@@ -142,7 +142,7 @@ const AddSeedModal = ({
                                     </div>
                                 ) : (
                                     <div>
-                                        <h2 className="font-['Lora'] text-2xl text-[#343A40] mb-4">What's your ideal rhythm?</h2>
+                                        <h2 className="font-['Lora'] text-2xl text-[#343A40] mb-4">What&apos;s your ideal rhythm?</h2>
                                         <div className="mb-6 text-center">
                                             <p className="text-lg text-[#343A40]">{paceOptions[rhythmIndex].primary}</p>
                                             <p className="text-sm opacity-70 text-[#343A40]">{paceOptions[rhythmIndex].secondary}</p>

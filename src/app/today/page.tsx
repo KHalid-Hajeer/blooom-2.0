@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-// Import the unified `Plant` type and the `isPlantDue` helper
 import { useGoals } from '@/contexts/GoalsContexts';
-import { type Plant, isPlantDue } from '@/lib/growthLogic';
+import { isPlantDue } from '@/lib/growthLogic';
 import AppHeader from '@/components/layout/AppHeader';
 import { ArrowPathIcon, SunIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
@@ -21,7 +20,7 @@ export default function TodayPage() {
   const todaysIntentions = plants.filter(isPlantDue);
 
   // State management for the current card remains the same
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex] = useState(0);
 
   const handleAcknowledge = () => {
     // Ensure we're acknowledging the correct plant
@@ -39,7 +38,7 @@ export default function TodayPage() {
        <div className="min-h-screen bg-background flex flex-col">
           <AppHeader />
           <main className="flex-1 flex flex-col items-center justify-center p-6 text-center text-text-muted">
-            <h2 className="text-2xl font-display mb-2">It's a quiet day.</h2>
+            <h2 className="text-2xl font-display mb-2">It&apos;s a quiet day.</h2>
             <p>Nothing needs tending right now.</p>
         </main>
        </div>
@@ -56,7 +55,7 @@ export default function TodayPage() {
        <div className="min-h-screen bg-background flex flex-col">
           <AppHeader />
           <main className="flex-1 flex flex-col items-center justify-center p-6 text-center text-text-muted">
-            <h2 className="text-2xl font-display mb-2">It's a quiet day.</h2>
+            <h2 className="text-2xl font-display mb-2">It&apos;s a quiet day.</h2>
             <p>Nothing needs tending right now.</p>
         </main>
        </div>

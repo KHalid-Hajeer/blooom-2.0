@@ -139,7 +139,7 @@ const Home: FC = () => {
                 <div className="md:w-1/2">
                   <div className="bg-primary/5 aspect-square rounded-3xl shadow-xl border border-primary/20 flex items-center justify-center p-8">
                      {/* Updated placeholder to be more descriptive */}
-                    <p className="text-text/60 font-body text-center">Animation: "{step.visual_description}"</p>
+                    <p className="text-text/60 font-body text-center">Animation: &quot;{step.visual_description}&quot;</p>
                   </div>
                 </div>
               </div>
@@ -157,7 +157,7 @@ const Home: FC = () => {
                 {activeTestimonial ? (
                   <>
                     <p className="text-2xl md:text-3xl font-light font-body text-text leading-snug">
-                      "{activeTestimonial.text}"
+                      &quot;{activeTestimonial.text}&quot;
                     </p>
                     <div className="mt-8">
                        {/* Added icon for a personal touch */}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AppHeader from "@/components/layout/AppHeader";
-import { LightBulbIcon, BugAntIcon, SparklesIcon, ArrowUturnLeftIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { LightBulbIcon, BugAntIcon, SparklesIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
@@ -44,7 +44,7 @@ export default function ShareAThoughtPage() {
                     >
                         <SparklesIcon className="w-16 h-16 text-yellow-400 mx-auto" />
                         <h2 className="text-3xl font-display text-primary mt-6">Thank you for your kindness.</h2>
-                        <p className="text-gray-600 mt-2">Your note has been received and will be tended to with care. We're grateful to have you in our community.</p>
+                        <p className="text-gray-600 mt-2">Your note has been received and will be tended to with care. We&apos;re grateful to have you in our community.</p>
                         <Link href="/garden">
                             <button className="mt-8 px-8 py-3 bg-primary text-background font-bold font-display text-md rounded-full shadow-lg hover:scale-105 transform transition-transform duration-300">
                                 Back to Your Garden
@@ -62,7 +62,7 @@ export default function ShareAThoughtPage() {
             <main className="flex-grow flex flex-col items-center p-6 pt-12">
                 <div className="w-full max-w-2xl mx-auto">
                     <h2 className="text-4xl font-display text-center text-primary">A Note for the Gardeners</h2>
-                    <p className="text-center text-gray-500 mt-2">What's on your mind?</p>
+                    <p className="text-center text-gray-500 mt-2">What&apos;s on your mind?</p>
 
                     <div className="grid grid-cols-3 gap-4 my-8">
                         {(Object.keys(categories) as Category[]).map(key => (

@@ -1,16 +1,6 @@
 import React from 'react';
-// 1. Import the Plant type to ensure type alignment
-import type { Plant } from '@/lib/growthLogic';
 
-// =================================================================================
-// --- FILE: /components/onboarding/StepThree.tsx (Type Fix) ---
-// This file is updated to ensure the paceOptions have the correct, specific type.
-// =================================================================================
-
-// The type is now derived directly from the Plant interface's rhythm property
-type PaceDescription = Plant['rhythm'];
-
-// 2. Add `as const` to infer the most specific types for the array elements.
+// Add `as const` to infer the most specific types for the array elements.
 // This makes the `secondary` properties specific string literals, not just `string`.
 export const paceOptions = [
   { primary: "A Gentle Monthly Moment", secondary: "Once a month" },
@@ -33,7 +23,7 @@ export default function StepThree({ onNext, onBack, rhythmIndex, setRhythmIndex 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center bg-background text-text p-6">
       <h1 className="absolute top-6 left-6 text-2xl font-display text-primary">bloom</h1>
-      <p className="text-2xl font-display mb-6">What's your ideal rhythm?</p>
+      <p className="text-2xl font-display mb-6">What&apos;s your ideal rhythm?</p>
       
       <input
         type="range"

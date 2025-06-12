@@ -16,7 +16,7 @@ export default function StepFour({ onBack, onComplete }: StepFourProps) {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center bg-background text-text p-6">
       <h1 className="absolute top-6 left-6 text-2xl font-display text-primary">bloom</h1>
-      <p className="text-2xl font-display mb-6">Wonderful. Let's plant your first seed.</p>
+      <p className="text-2xl font-display mb-6">Wonderful. Let&apos;s plant your first seed.</p>
       <div className="flex items-center gap-4">
         <button
           onClick={onBack}
