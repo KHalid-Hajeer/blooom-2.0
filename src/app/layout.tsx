@@ -1,27 +1,24 @@
 import type { Metadata } from "next";
-import { Baloo_2, Source_Serif_4 } from "next/font/google";
-import { GoalsProvider } from "@/contexts/GoalsContexts"; // Assuming the file is GoalsContexts.tsx
+import { Lora, Inter } from "next/font/google";
 import "./globals.css";
 
-// Configure Baloo 2 (primary font)
-const fontDisplay = Baloo_2({
+// Font setup
+const fontDisplay = Lora({
   subsets: ["latin"],
-  weight: "500", // Using Medium weight (500) instead of a heavy bold
+  weight: ["400", "700"],
   variable: "--font-display",
   display: "swap",
 });
 
-// Configure Source Serif 4 (text font)
-const fontBody = Source_Serif_4({
+const fontBody = Inter({
   subsets: ["latin"],
-  weight: ["400", "700"], // Regular and Bold weights
   variable: "--font-body",
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Bloom",
-  description: "A kinder way to grow",
+  description: "A kinder way to grow — a digital sanctuary for self-growth and reflection.",
 };
 
 export default function RootLayout({
@@ -31,11 +28,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${fontBody.variable} ${fontDisplay.variable}`}>
-      <body className="bg-background text-text font-body antialiased">
-        {/* GoalsProvider wraps the entire application, making goal data available to all pages */}
-        <GoalsProvider>
-          {children}
-        </GoalsProvider>
+      <head>
+        <meta charSet="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="theme-color" content="#1e1e24" />
+      </head>
+      <body className="font-body" style={{ background: "linear-gradient(180deg, var(--color-heavy-start), var(--color-heavy-end))", color: "rgba(255,255,255,0.9)" }}>
+        <main>{children}</main>
       </body>
     </html>
   );

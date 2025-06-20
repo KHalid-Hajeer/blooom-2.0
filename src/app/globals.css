@@ -1,13 +1,62 @@
 @import "tailwindcss";
 
-/* Refined Bloom Theme Palette */
 @theme {
-    /* Colors */
-    --color-background: #FFFFFF; 
-    --color-text: #7A4419;         
-    --color-primary: #1F3D2B;  
-    
-    /* Fonts - Recoleta (display) + Inter (body) */
-    --font-display: var(--font-display); /*   */
-    --font-body: var(--font-body);       /*  */
+    /* === BASE THEME === */
+    /* Use these for general UI, chrome, and the default state */
+    --color-background: #f7f4ef;
+    --color-text: #343A40;
+    --color-primary: #6d8a6a; /* Earthy Green */
+    --color-action: #E5836D;
+    --color-text-muted: #867D79;
+    --color-border: #DCDCDC;
+
+    /* Original Landing Page Default Gradient Colors */
+    --color-heavy-start: #1e293b; /* Darker charcoal */
+    --color-heavy-end: #111827;   /* Almost black, matches body background */
+
+
+    /* === FEELING JOURNEY THEMES (as per your plan) === */
+    /* 1. Joy: Warm sunshine, golden-pink glow */
+    --color-joy-start: #FFD580;   /* Soft Golden Yellow */
+    --color-joy-end: #FF9AA2;     /* Warm Coral Pink */
+
+    /* 2. Sadness: Cool blue-grey twilight */
+    --color-sadness-start: #2E3047;   /* Muted Blue-Gray */
+    --color-sadness-end: #697C94;     /* Deep Slate Blue */
+
+    /* 3. Fear: Misty purples and shadowy tones */
+    --color-fear-start: #B3A8D9;   /* Dusty Lavender */
+    --color-fear-end: #5C5470;     /* Deep Shadow Purple */
+
+    /* 4. Anger: Deep crimson and smoky ember */
+    --color-anger-start: #9B1D20;  /* Burnt Crimson */
+    --color-anger-end: #FF6A3D;    /* Dark Ember Red */
+
+    /* === FONTS === */
+    --font-display: var(--font-display);
+    --font-body: var(--font-body);
+}
+
+.animated-gradient-background {
+  background: linear-gradient(
+    -45deg,
+    var(--color-heavy-start),
+    var(--color-curious-start),
+    var(--color-unclear-start),
+    var(--color-hopeful-start)
+  );
+  background-size: 400% 400%;
+  animation: gradient-flow 30s ease-in-out infinite;
+}
+
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
