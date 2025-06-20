@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Leaf, Sparkles, Eye, Sun, Lock, BookOpen, Bot } from 'lucide-react';
+import { Leaf, Sparkles, Eye, Sun, Lock } from 'lucide-react';
 
 // --- Data for Cards ---
 const feelingData = {
@@ -56,7 +56,7 @@ export default function JourneyPage() {
             transition={{ duration: 0.8 }}
             className="w-full max-w-2xl text-center"
         >
-            <h1 className="font-display text-4xl">Today's Bloom</h1>
+            <h1 className="font-display text-4xl">Today&apos;s Bloom</h1>
             {hasMounted && lastRoom && lastFeeling && LastIcon ? (
                 <div className="mt-4 p-6 bg-white/60 rounded-lg shadow-sm border border-black/5">
                     <p className="text-slate-600">You last visited a space for feeling <span className="font-semibold">{lastFeeling}</span>.</p>

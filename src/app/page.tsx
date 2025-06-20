@@ -5,15 +5,15 @@ import { motion, Variants } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Typewriter from "@/components/animation/typewriter";
 import InteractiveGradient from "@/components/animation/interactive-gradient";
-import { wisps } from "@/data/content"; // Import wisps from centralized data
+import { wisps } from "@/data/content";
 
 // --- Wisp Component ---
 interface WispProps {
   word: string;
-  onHover: (start: string, end: string) => void; // Updated to pass colors
+  onHover: (start: string, end: string) => void;
   onLeave: () => void;
   onClick: () => void;
-  color: string; // Added color prop
+  color: string;
 }
 
 const wispParentVariants: Variants = {
@@ -31,7 +31,7 @@ const wispTextVariants: Variants = {
   hover: { opacity: 1, transition: { delay: 0.1 } },
 };
 
-function Wisp({ word, onHover, onLeave, onClick, color }: WispProps) {
+function Wisp({ word, onHover, onLeave, onClick }: WispProps) {
   const wispData = wisps.find(w => w.word === word);
   return (
     <motion.div
@@ -81,7 +81,7 @@ export default function HomePage() {
 
   // Check local storage for last visited feeling on mount
   useEffect(() => {
-    const storedFeeling = localStorage.getItem("lastVisitedFeeling");
+    const storedFeeling = typeof window !== "undefined" ? localStorage.getItem("lastVisitedFeeling") : null;
     if (storedFeeling) {
       setLastVisitedFeeling(storedFeeling);
       setShowContinueButton(true);
