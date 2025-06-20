@@ -1,7 +1,6 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useRef, Key } from "react";
-import Typewriter from "../animation/typewriter";
+import { useState, useRef} from "react";
 
 // The main component, now with enhanced animations
 export default function ThoughtCatcher() {

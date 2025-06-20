@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, useMotionValue, useTransform, Variants } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Typewriter from "@/components/animation/typewriter";
 import InteractiveGradient from "@/components/animation/interactive-gradient";
