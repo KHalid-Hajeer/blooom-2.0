@@ -1,40 +1,120 @@
 @import "tailwindcss";
 
 @theme {
+  
     /* === BASE THEME === */
-    /* Use these for general UI, chrome, and the default state */
-    --color-background: #f7f4ef;
-    --color-text: #343A40;
-    --color-primary: #6d8a6a; /* Earthy Green */
-    --color-action: #E5836D;
-    --color-text-muted: #867D79;
-    --color-border: #DCDCDC;
+    --color-text: #FFFFFF;
+    --color-light-text: #E5E5E5;
 
     /* Original Landing Page Default Gradient Colors */
-    --color-heavy-start: #1e293b; /* Darker charcoal */
-    --color-heavy-end: #111827;   /* Almost black, matches body background */
+    --color-heavy-start: #1e293b; 
+    --color-heavy-end: #000005;  
 
 
-    /* === FEELING JOURNEY THEMES (as per your plan) === */
-    /* 1. Joy: Warm sunshine, golden-pink glow */
-    --color-joy-start: #FFD580;   /* Soft Golden Yellow */
-    --color-joy-end: #FF9AA2;     /* Warm Coral Pink */
+    /* === FEELING JOURNEY THEMES BACKGROUND === */
+    --color-joy-start: #FFE6B3;   
+    --color-joy-end: #FFD1BA;     
+    --color-sadness-start: #5F637A;   
+    --color-sadness-end: #A5B1C7;     
+    --color-fear-start: #BDAFE2;   
+    --color-fear-end: #847BA9;    
+    --color-anger-start: #D98B8C; 
+    --color-anger-end: #FFB48C; 
 
-    /* 2. Sadness: Cool blue-grey twilight */
-    --color-sadness-start: #2E3047;   /* Muted Blue-Gray */
-    --color-sadness-end: #697C94;     /* Deep Slate Blue */
+    /* === FEELING JOURNEY THEMES REFLECT BUTTON === */
+    --button-joy-start: #FFAB6A;
+    --button-joy-end:   #FF7A5A; 
+    --button-sadness-start: #364159;  
+    --button-sadness-end:   #657BA3;  
+    --button-fear-start: #7D6DB3;  
+    --button-fear-end:   #53478A;  
+    --button-anger-start: #B35C5D;  
+    --button-anger-end:   #8C3F3F; 
 
-    /* 3. Fear: Misty purples and shadowy tones */
-    --color-fear-start: #B3A8D9;   /* Dusty Lavender */
-    --color-fear-end: #5C5470;     /* Deep Shadow Purple */
 
-    /* 4. Anger: Deep crimson and smoky ember */
-    --color-anger-start: #9B1D20;  /* Burnt Crimson */
-    --color-anger-end: #FF6A3D;    /* Dark Ember Red */
+    /* === NEW: PLANET GRADIENT THEMES === */
+    /* 🌱 GARDEN — rooted in calm, growth, nature (joy-inspired green) */
+    --planet-garden-start: #D2F3D0;         /* Soft herbal green */
+    --planet-garden-end:   #96D99D;         /* Deeper, cooler green for grounding */
+    --planet-garden-ripple: #5AA37A;        /* Earthy leaf ripple */
+
+    /* 🛤️ JOURNEY — active, warm, alive (anger + joy-inspired) */
+    --planet-journey-start: #FFE2C3;        /* Light golden peach */
+    --planet-journey-end:   #FF9E6D;        /* Bold apricot for adventure */
+    --planet-journey-ripple: #F57C4D;       /* Saturated coral-orange */
+
+    /* 🌊 REFLECTIONS — gentle, quiet, deep (sadness-inspired) */
+    --planet-reflections-start: #DCE6F5;    /* Soft blue mist */
+    --planet-reflections-end:   #9CB4D6;    /* Deeper cloudy blue */
+    --planet-reflections-ripple: #6D88B2;   /* Reflective lake ripple */
+
+    /* 🤝 COMPANION — warmth, emotion, care (anger + joy fusion) */
+    --planet-companion-start: #E6E0F3;       /* Soft lilac haze */
+    --planet-companion-end:   #C5B8E0;       /* Dusky lavender */
+    --planet-companion-ripple: #8C7BC2;      /* Deeper violet, rich with presence */
+
+    /* ⚙️ SETTINGS — neutral, stable, soft (fear/sadness hybrid) */
+    --planet-settings-start: #DDE5E7;       /* Cool grey-blue */
+    --planet-settings-end:   #A3ACB1;       /* Steel toned */
+    --planet-settings-ripple: #6F7C85;      /* Deep slate ripple */
+
+
+
+    /* === CENTRAL SUN === */
+    --sun-start: #FFD476;                  /* Radiant, joyful gold */
+    --sun-end:   #FFA94D;                  /* Warm sunset amber */
+    --sun-glow:  rgba(255, 168, 84, 0.7);  /* Glowing golden warmth */
+    --sun-quote-color: rgba(255, 247, 230, 0.97);  /* Soft creamy white */
+    --sun-quote-glow: #FFD39F;            /* Glowy apricot halo */
+    --sun-quote-glow: #FFFFFF;
 
     /* === FONTS === */
     --font-display: var(--font-display);
     --font-body: var(--font-body);
+    
+   /* Breakpoints */
+  --breakpoint-sm:  640px;
+  --breakpoint-md:  768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl:1536px;
+
+  /* Core Palette */
+  --color-text:        #ffffff;
+  --color-light-text:  #e5e5e5;
+  --color-heavy-start: #1e293b;
+  --color-heavy-end:   #000005;
+
+  /* Mood Gradients */
+  --color-joy-start:      #ffe6b3;
+  --color-joy-end:        #ffd1ba;
+  --color-sadness-start:  #5f637a;
+  --color-sadness-end:    #a5b1c7;
+  --color-fear-start:     #bdafe2;
+  --color-fear-end:       #847ba9;
+  --color-anger-start:    #d98b8c;
+  --color-anger-end:      #ffb48c;
+
+  /* Accents & Easing */
+  --accent-primary:   #facc15;
+  --accent-secondary: #ec4899;
+  --ease-fluid:       cubic-bezier(0.3,0,0,1);
+  --ease-snappy:      cubic-bezier(0.2,0,0,1);
+}
+
+/* Star “twinkle” */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.3); }
+}
+
+@layer utilities {
+  .animate-twinkle {
+    animation: twinkle 4s infinite var(--ease-fluid);
+  }
+  .placeholder-light-text::placeholder {
+    color: var(--color-light-text);
+  }
 }
 
 .animated-gradient-background {
@@ -59,4 +139,138 @@
   100% {
     background-position: 0% 50%;
   }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: scale(.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px) scale(.98); }
+  to { opacity: 1; transform: translateY(0px) scale(1); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 10s ease-in-out infinite;
+}
+.animate-float-slow {
+  animation: float 16s ease-in-out infinite;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(94, 234, 212, 0.4);
+  border-radius: 20px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(94, 234, 212, 0.6);
+}
+
+/* Custom scrollbar for Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(94, 234, 212, 0.4) transparent;
+}
+
+.companion-container {
+  @apply min-h-screen flex flex-col justify-between bg-gradient-to-b from-[#1D1A2D] to-[#2E2A47] text-white;
+}
+
+.companion-header {
+  @apply p-6 text-center text-xl font-light tracking-wide;
+}
+
+.companion-messages {
+  @apply flex-1 overflow-y-auto px-6 pb-4 space-y-2;
+}
+
+.companion-bubble {
+  @apply max-w-xs px-4 py-2 my-1 rounded-2xl text-sm shadow-md;
+}
+
+.user-bubble {
+  @apply bg-[#D9CCE3] text-black rounded-br-none;
+}
+
+.companion-bubble-companion {
+  @apply bg-[#6E62B6] text-white rounded-bl-none;
+}
+
+.companion-input-container {
+  @apply flex items-center gap-2 p-4 bg-transparent;
+}
+
+.companion-input {
+  @apply flex-1 p-2 rounded-xl bg-[#2E2A47] text-white placeholder:text-gray-400 outline-none;
+}
+
+.companion-send-button {
+  @apply text-white bg-[#6E62B6] px-4 py-2 rounded-xl hover:opacity-80;
+}
+
+.settings-page.refined {
+  @apply min-h-screen px-6 py-12 max-w-2xl mx-auto text-[#1E1A16] bg-[#FAF9F7];
+}
+
+.settings-title {
+  @apply text-2xl font-semibold mb-10;
+}
+
+.settings-section {
+  @apply bg-white border border-[#EEE7DE] rounded-xl p-6 mb-6 shadow-sm;
+}
+
+.settings-section-title {
+  @apply text-lg font-semibold mb-4;
+}
+
+.settings-label {
+  @apply text-sm text-[#3B2E28] mb-1;
+}
+
+.settings-input {
+  @apply w-full border border-[#8F633F] text-[#3B2E28] bg-transparent rounded-md px-3 py-2 mb-2;
+}
+
+.settings-link {
+  @apply text-sm text-[#643B20] font-medium hover:underline;
+}
+
+.settings-button {
+  @apply mt-3 inline-block px-5 py-2 rounded-full bg-[#1E3D32] text-white font-medium hover:opacity-90;
+}
+
+.settings-description {
+  @apply text-sm text-[#4A403A] leading-relaxed;
+}
+
+.with-icon {
+  @apply flex items-center gap-2 text-sm mt-3;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+.animate-twinkle {
+  animation: twinkle 4s infinite ease-in-out;
 }

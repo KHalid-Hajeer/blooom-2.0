@@ -2,7 +2,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import Typewriter from "../animation/typewriter";
-import InteractiveGradient from "../animation/interactive-gradient";
 
 const PHASES = [
 	{ label: "Breathe in", duration: 4.5 },
@@ -14,7 +13,6 @@ const PHASES = [
 export default function BreathingAnchor() {
 	const [phaseIdx, setPhaseIdx] = useState(0);
 
-	// Cycle through phases
 	useEffect(() => {
 		const timeout = setTimeout(() => {
 			setPhaseIdx((idx) => (idx + 1) % PHASES.length);
@@ -22,32 +20,19 @@ export default function BreathingAnchor() {
 		return () => clearTimeout(timeout);
 	}, [phaseIdx]);
 
-	// Animation values for scale and opacity
 	const getAnimation = () => {
 		switch (phaseIdx) {
-			case 0: // Breathe in
-				return { scale: 1.2, opacity: 1 };
-			case 1: // Rest (hold)
-				return { scale: 1.2, opacity: 1 };
-			case 2: // Breathe out
-				return { scale: 1, opacity: 0.7 };
-			case 3: // Rest (hold)
-				return { scale: 1, opacity: 0.7 };
-			default:
-				return { scale: 1, opacity: 0.7 };
+			case 0: return { scale: 1.2, opacity: 1 };
+			case 1: return { scale: 1.2, opacity: 1 };
+			case 2: return { scale: 1, opacity: 0.7 };
+			case 3: return { scale: 1, opacity: 0.7 };
+			default: return { scale: 1, opacity: 0.7 };
 		}
 	};
 
 	return (
-		<div className="relative flex items-center justify-center h-screen w-full overflow-hidden">
-			{/* Interactive Gradient Background */}
-			<InteractiveGradient
-				startColor="var(--color-sadness-start)"
-				endColor="var(--color-sadness-end)"
-			/>
-
-			{/* Centered breathing circle and text */}
-			<div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+		<div className="relative flex items-center justify-center h-full w-full overflow-hidden font-body">
+			<div className="absolute inset-0 flex flex-col items-center justify-center z-10 p-4">
 				<motion.div
 					className="relative w-48 h-48 md:w-64 md:h-64 rounded-full bg-white/20 flex items-center justify-center"
 					animate={getAnimation()}
@@ -56,11 +41,11 @@ export default function BreathingAnchor() {
 						ease: "easeInOut",
 					}}
 				>
-					<span className="font-body text-xl md:text-2xl text-white drop-shadow text-center select-none pointer-events-none">
+					<span className="text-xl md:text-2xl text-white drop-shadow text-center select-none pointer-events-none">
 						{PHASES[phaseIdx].label}
 					</span>
 				</motion.div>
-				<div className="font-body text-[var(--color-sadness-text)] mt-12 text-lg opacity-90">
+				<div className="text-white/90 mt-12 text-lg">
 					<Typewriter text="Sync your breath with the light" speed={40} />
 				</div>
 			</div>

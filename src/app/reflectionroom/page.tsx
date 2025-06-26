@@ -3,16 +3,27 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import InteractiveGradient from "@/components/animation/interactive-gradient"; // Import the gradient
+import InteractiveGradient from "@/components/animation/interactive-gradient";
+import { MemoryStore } from "@/lib/memory"; // Import the MemoryStore
 
 export default function ReflectionRoom() {
   const [journalEntry, setJournalEntry] = useState("");
   const router = useRouter();
 
   const handleComplete = () => {
+    if (journalEntry.trim()) {
+      // Create a new reflection memory when the user completes the entry
+      MemoryStore.addMemory({
+        type: "reflection",
+        title: "A Moment of Reflection", // A default title, can be improved later
+        content: journalEntry,
+        mood: "reflective", // A default mood
+        intensity: Math.max(0.2, Math.min(1, journalEntry.length / 500)), // Intensity based on length
+      });
+    }
     // Clear last visited feeling from local storage on completing reflection
     localStorage.removeItem("lastVisitedFeeling");
-    router.push("/journey"); // Redirect to the journey page
+    router.push("/hub"); // Redirect to the hub to see the new star
   };
 
   return (
@@ -66,6 +77,16 @@ export default function ReflectionRoom() {
         className="mt-4 px-8 py-3 bg-white/10 rounded-lg hover:bg-white/20 transition text-white/80 z-10"
       >
         Want to see more of yourself?
+      </motion.button>
+
+      <motion.button
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8, duration: 0.5 }}
+        onClick={() => router.push("/hub")}
+        className="mt-4 px-8 py-3 bg-blue-500/80 rounded-lg hover:bg-blue-600/90 transition text-white font-semibold z-10"
+      >
+        Login
       </motion.button>
     </div>
   );
