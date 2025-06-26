@@ -12,18 +12,23 @@ export default function CreateAccountPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [plan, setPlan] = useState<"monthly" | "yearly">("monthly");
-  const [startColor, setStartColor] = useState("#4a4a88");
-  const [endColor, setEndColor] = useState("#8a55c7");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Temporarily skipping Stripe
-    router.push("/onboarding/welcome");
+    // In a real app, you would handle user creation here.
+    // For now, we'll simulate success.
+    
+    // Mark onboarding as complete and remove the step tracker
+    localStorage.setItem('onboardingCompleted', 'true');
+    localStorage.removeItem('onboardingStep');
+    
+    // Redirect to the now fully unlocked hub
+    router.push("/hub");
   };
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-8 overflow-hidden">
-      <InteractiveGradient startColor={startColor} endColor={endColor} />
+      <InteractiveGradient startColor={'#4a4a88'} endColor={'#8a55c7'} />
 
       <motion.h1
         initial={{ opacity: 0 }}
@@ -45,6 +50,7 @@ export default function CreateAccountPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="bg-transparent border-b border-white/40 focus:border-white py-2 px-1 outline-none transition-all"
+            required
           />
         </div>
 
@@ -56,6 +62,7 @@ export default function CreateAccountPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="bg-transparent border-b border-white/40 focus:border-white py-2 px-1 outline-none transition-all"
+            required
           />
         </div>
 
@@ -67,37 +74,10 @@ export default function CreateAccountPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="bg-transparent border-b border-white/40 focus:border-white py-2 px-1 outline-none transition-all"
+            required
           />
         </div>
-
-        <div className="mt-4">
-          <p className="mb-2 text-sm">How would you like to support your space?</p>
-          <div className="flex gap-4">
-            <button
-              type="button"
-              className={`flex-1 px-4 py-3 rounded-lg border transition-all ${
-                plan === "monthly"
-                  ? "bg-white/10 border-white"
-                  : "bg-white/5 border-white/30 hover:border-white/50"
-              }`}
-              onClick={() => setPlan("monthly")}
-            >
-              ✨ Monthly Flow <br /> <span className="text-sm">$5/month</span>
-            </button>
-            <button
-              type="button"
-              className={`flex-1 px-4 py-3 rounded-lg border transition-all ${
-                plan === "yearly"
-                  ? "bg-white/10 border-white"
-                  : "bg-white/5 border-white/30 hover:border-white/50"
-              }`}
-              onClick={() => setPlan("yearly")}
-            >
-              🌙 Deep Commitment <br /> <span className="text-sm">$50/year</span>
-            </button>
-          </div>
-        </div>
-
+        
         <motion.button
           type="submit"
           whileTap={{ scale: 0.98 }}

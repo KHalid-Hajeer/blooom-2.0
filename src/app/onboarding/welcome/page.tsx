@@ -16,7 +16,6 @@ export default function WelcomePage() {
   const router = useRouter();
   const [stars, setStars] = useState<Star[]>([]);
 
-  // Generate simple animated particles/stars
   useEffect(() => {
     const count = 40;
     const starArray = Array.from({ length: count }, (_, i) => ({
@@ -29,9 +28,14 @@ export default function WelcomePage() {
     setStars(starArray);
   }, []);
 
+  const handleEnter = () => {
+    localStorage.setItem('onboardingStep', '0');
+    localStorage.removeItem('onboardingCompleted');
+    router.push("/hub");
+  }
+
   return (
     <div className="relative min-h-screen bg-black text-white flex flex-col justify-center items-center overflow-hidden px-6">
-      {/* Star particles */}
       {stars.map(star => (
         <motion.div
           key={star.id}
@@ -46,15 +50,13 @@ export default function WelcomePage() {
           }}
         />
       ))}
-
-      {/* Centered content */}
       <motion.h1
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 1 }}
         className="text-3xl md:text-5xl font-display text-center mb-4 z-10"
       >
-        This space is now yours.
+        Welcome to your space.
       </motion.h1>
       <motion.p
         initial={{ opacity: 0 }}
@@ -62,18 +64,15 @@ export default function WelcomePage() {
         transition={{ delay: 1, duration: 1 }}
         className="text-lg text-white/70 text-center mb-10 z-10"
       >
-        Return whenever you're ready.
+        Let's bring it to life.
       </motion.p>
-
       <motion.button
-        onClick={() => router.push("/onboarding/walkthrough")}
+        onClick={handleEnter}
         whileTap={{ scale: 0.96 }}
         className="px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-lg transition z-10"
       >
         Enter Your Space
       </motion.button>
-
-      {/* Optional: subtle gradient behind */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
       <style jsx>{`
         @keyframes twinkle {
