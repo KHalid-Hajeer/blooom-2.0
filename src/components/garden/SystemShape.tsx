@@ -34,7 +34,7 @@ export default function SystemShape({
   x: number;
   y: number;
   color: string;
-  lastTended?: string; // FIX: This prop is now correctly defined as optional.
+  lastTended?: string;
   isDraggable: boolean;
   onDragEnd: (id: number, info: PanInfo) => void;
   onClick: () => void;
@@ -56,7 +56,7 @@ export default function SystemShape({
         translateY: { duration: 10, repeat: Infinity, ease: "easeInOut" },
       }}
       whileHover={{ scale: 1.1, zIndex: 10, translateY: 0 }}
-      className={`absolute group cursor-pointer ${stageStyles[stage] || stageStyles.seed}`} // Added fallback for safety
+      className={`absolute group cursor-pointer ${stageStyles[stage] || stageStyles.seed}`}
       onClick={onClick}
     >
       <SphericalCircle
@@ -79,8 +79,8 @@ export default function SystemShape({
         <div className="font-bold text-base">{name} — <span className="capitalize">{stage}</span></div>
         <p className="text-white/80 my-1">{description || "No description."}</p>
         <div className="text-xs opacity-70">
-          {/* FIX: Handle the display logic for a potentially undefined date */}
-          Last tended: {lastTended ? new Date(lastTended).toLocaleString() : 'Never'}
+          {/* FIX: Use a consistent date format */}
+          Last tended: {lastTended ? new Date(lastTended).toLocaleDateString() : 'Never'}
         </div>
         <div className="pt-2 mt-2 border-t border-white/20 flex justify-between items-center">
           <button 

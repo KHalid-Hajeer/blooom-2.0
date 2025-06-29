@@ -72,8 +72,13 @@ export default function GardenPage() {
     if (!user) {
         const pendingSystemJSON = localStorage.getItem(PENDING_SYSTEM_KEY);
         if (pendingSystemJSON) {
-            const pendingSystem = JSON.parse(pendingSystemJSON);
-            setSystems([pendingSystem]);
+            try {
+                const pendingSystem = JSON.parse(pendingSystemJSON);
+                setSystems([pendingSystem]);
+            } catch (e) {
+                console.error("Failed to parse pending system from localStorage", e);
+                localStorage.removeItem(PENDING_SYSTEM_KEY);
+            }
         }
         setLoading(false);
         return;
@@ -141,9 +146,6 @@ export default function GardenPage() {
         setSystems([pendingSystem]);
         setSubmissionStatus({ isLoading: false, error: null });
         handleCloseModal();
-        // This is where you would typically trigger the next step of onboarding
-        // For example, by using the router to navigate to the signup page.
-        // router.push('/onboarding/create-account');
         return;
     }
 
@@ -167,9 +169,10 @@ export default function GardenPage() {
         setSystems(prevSystems => [...prevSystems, formatSystem(newSystemData as RawSystem)]);
         handleCloseModal();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error planting system:", error);
-      setSubmissionStatus({ isLoading: false, error: error.message || "An unknown error occurred." });
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+      setSubmissionStatus({ isLoading: false, error: errorMessage });
     }
   }, [user, handleCloseModal]);
 

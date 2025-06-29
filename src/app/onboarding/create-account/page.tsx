@@ -12,12 +12,11 @@ import { User } from "@supabase/supabase-js";
 
 const PENDING_SYSTEM_KEY = 'bloom_pending_system';
 
-// FIX: New function to save the pending system from localStorage
 const savePendingSystem = async (user: User) => {
     const pendingSystemJSON = localStorage.getItem(PENDING_SYSTEM_KEY);
     if (pendingSystemJSON) {
-        const systemData = JSON.parse(pendingSystemJSON);
         try {
+            const systemData = JSON.parse(pendingSystemJSON);
             const { error } = await supabase.from('systems').insert({
                 name: systemData.name,
                 description: systemData.description,
@@ -28,10 +27,9 @@ const savePendingSystem = async (user: User) => {
                 user_id: user.id,
             });
             if (error) throw error;
-            localStorage.removeItem(PENDING_SYSTEM_KEY); // Clear it after successful save
+            localStorage.removeItem(PENDING_SYSTEM_KEY);
         } catch (error) {
             console.error("Failed to save pending system:", error);
-            // Don't remove the key, so we can try again later
         }
     }
 };
@@ -48,29 +46,36 @@ export default function CreateAccountPage() {
     setError(null);
     setMessage(null);
 
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
     });
 
-    if (error) {
-      setError(error.message);
-    } else if (data.user?.identities?.length === 0) {
+    if (signUpError) {
+      setError(signUpError.message);
+      return;
+    }
+    
+    if (data.user?.identities?.length === 0) {
       setError("This user already exists. Please try logging in.");
-    } 
-    else {
-      setMessage("Success! Please check your email to confirm your account.");
-      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if(signInError) {
-        setError(signInError.message);
-      } else if (user) {
-        // FIX: Call the save function after successful login
-        await savePendingSystem(user);
-        
-        localStorage.setItem('onboardingCompleted', 'true');
-        localStorage.removeItem('onboardingStep');
-        router.push("/hub");
-      }
+      return;
+    }
+
+    setMessage("Success! Please check your email to confirm your account.");
+    
+    // Auto-login the user after sign-up
+    const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    
+    if (signInError) {
+      setError(signInError.message);
+    } else if (user) { // FIX: Ensure user object exists before proceeding
+      await savePendingSystem(user);
+      
+      localStorage.setItem('onboardingCompleted', 'true');
+      localStorage.removeItem('onboardingStep');
+      router.push("/hub");
+    } else {
+      setError("Login failed after sign up. Please try logging in manually.");
     }
   };
 
