@@ -6,6 +6,7 @@ import SphericalCircle from "../ui/SphericalCircle";
 import { motion, PanInfo } from "framer-motion";
 
 const stageStyles = {
+  seed: "w-6 h-6 opacity-40",
   planted: "w-8 h-8 opacity-50",
   sprouted: "w-12 h-12 opacity-70",
   blooming: "w-16 h-16 opacity-90",
@@ -33,7 +34,7 @@ export default function SystemShape({
   x: number;
   y: number;
   color: string;
-  lastTended: string;
+  lastTended?: string; // FIX: This prop is now correctly defined as optional.
   isDraggable: boolean;
   onDragEnd: (id: number, info: PanInfo) => void;
   onClick: () => void;
@@ -55,8 +56,7 @@ export default function SystemShape({
         translateY: { duration: 10, repeat: Infinity, ease: "easeInOut" },
       }}
       whileHover={{ scale: 1.1, zIndex: 10, translateY: 0 }}
-      className={`absolute group cursor-pointer ${stageStyles[stage]}`}
-      // 1. By making the main container the click target, we avoid issues.
+      className={`absolute group cursor-pointer ${stageStyles[stage] || stageStyles.seed}`} // Added fallback for safety
       onClick={onClick}
     >
       <SphericalCircle
@@ -72,15 +72,16 @@ export default function SystemShape({
           }}/>
       )}
       
-      {/* 3. The card is now positioned slightly overlapping the top of the circle to create a "bridge" for the mouse. */}
       <div 
         className="absolute left-1/2 bottom-full mb-1 -translate-x-1/2 w-64 text-xs text-white bg-black/40 px-4 py-3 rounded-lg backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto z-20"
-        // Stop clicks on the card from propagating to the circle's main onClick
         onClick={(e) => e.stopPropagation()}
       >
         <div className="font-bold text-base">{name} — <span className="capitalize">{stage}</span></div>
         <p className="text-white/80 my-1">{description || "No description."}</p>
-        <div className="text-xs opacity-70">Last tended: {lastTended}</div>
+        <div className="text-xs opacity-70">
+          {/* FIX: Handle the display logic for a potentially undefined date */}
+          Last tended: {lastTended ? new Date(lastTended).toLocaleString() : 'Never'}
+        </div>
         <div className="pt-2 mt-2 border-t border-white/20 flex justify-between items-center">
           <button 
             onClick={onViewLogsClick}
