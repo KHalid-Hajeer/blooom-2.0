@@ -4,14 +4,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { PlusIcon } from '../../components/chronicle/Icons';
 import { WritingModal } from '../../components/chronicle/WritingModal';
-import { BookModal, MoodConfig } from '../../components/chronicle/BookModal'; // Import MoodConfig here
+import { BookModal } from '../../components/chronicle/BookModal';
 import Toast from '../../components/chronicle/Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../AuthContext';
 import { supabase } from '@/lib/supabaseClient';
-
-// Import the configuration from a separate file
-import { moodConfig, moods, Mood } from '@/data/moods';
+import { moodConfig, Mood } from '@/data/moods';
 
 export type Reflection = {
   id: number; title: string; content: string; mood: Mood; date: string;
@@ -181,13 +179,20 @@ export default function ChroniclePage() {
                         <span className="hidden sm:inline">Plant a New Reflection</span>
                     </button>
                 </div>
+                
+                {/* FIX: Removed the unnecessary `moods` prop. */}
+                <WritingModal 
+                  isOpen={isWritingModalOpen} 
+                  onClose={() => setWritingModalOpen(false)} 
+                  onSave={handleSaveReflection} 
+                  reflection={editingReflection} 
+                />
 
-                <WritingModal isOpen={isWritingModalOpen} onClose={() => setWritingModalOpen(false)} onSave={handleSaveReflection} reflection={editingReflection} moods={moods} />
                 <AnimatePresence>
                     {activeReflection && (
                         <BookModal
                             reflection={activeReflection}
-                            moodConfig={moodConfig as MoodConfig}
+                            moodConfig={moodConfig}
                             onClose={() => setActiveReflection(null)}
                             onEdit={handleEdit}
                             onArchive={handleArchive}

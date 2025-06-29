@@ -1,15 +1,17 @@
+// src/components/chronicle/WritingModal.tsx
 import React, { useState, useEffect } from 'react';
-import { Reflection, Mood } from '@/app/chronicles/page'; // Adjusted import path
+// FIX: Corrected the import path to the new data file.
+import { Reflection } from '@/app/chronicles/page'; 
+import { Mood, moods } from '@/data/moods'; // Import moods here
 
 interface WritingModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (reflection: Omit<Reflection, 'date' | 'archived' | 'starred'>) => void;
     reflection: Reflection | null;
-    moods: Mood[];
 }
 
-export const WritingModal: React.FC<WritingModalProps> = ({ isOpen, onClose, onSave, reflection, moods }) => {
+export const WritingModal: React.FC<WritingModalProps> = ({ isOpen, onClose, onSave, reflection }) => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [mood, setMood] = useState<Mood>('joy');
@@ -45,7 +47,6 @@ export const WritingModal: React.FC<WritingModalProps> = ({ isOpen, onClose, onS
             >
                 <h2 className="text-2xl font-bold mb-6 text-white">{reflection ? 'Edit Reflection' : 'Plant a New Reflection'}</h2>
                 <form onSubmit={handleSubmit}>
-                    {/* Form fields remain the same */}
                     <div className="mb-4">
                         <label htmlFor="title" className="block text-sm font-medium text-gray-400 mb-2">Title</label>
                         <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-teal-400" />

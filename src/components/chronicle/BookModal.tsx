@@ -3,17 +3,13 @@ import React from 'react';
 import { Reflection } from '@/app/chronicles/page';
 import { EditIcon, ArchiveIcon, CopyIcon, StarIcon } from './Icons';
 import { motion } from 'framer-motion';
+// FIX: Changed MoodConfig to moodConfig to match the export.
+import { moodConfig as MoodConfigType } from '@/data/moods';
 
-// The moodConfig type needs to be defined here or imported if it's in a shared types file
-export type MoodConfig = {
-    [key: string]: {
-        color: string;
-        gradient: string;
-    }
-}
 interface BookModalProps {
     reflection: Reflection;
-    moodConfig: MoodConfig;
+    // FIX: Use the imported type alias.
+    moodConfig: typeof MoodConfigType;
     onClose: () => void;
     onEdit: (reflection: Reflection) => void;
     onArchive: (id: number) => void;
@@ -23,7 +19,7 @@ interface BookModalProps {
 
 export const BookModal: React.FC<BookModalProps> = ({ reflection, moodConfig, onClose, onEdit, onArchive, onStar, onCopy }) => {
     
-    const moodStyle = moodConfig[reflection.mood];
+    const moodStyle = moodConfig[reflection.mood as keyof typeof moodConfig];
     const fullTextToCopy = `Title: ${reflection.title}\nDate: ${reflection.date}\nMood: ${reflection.mood}\n\n${reflection.content}`;
 
     const handleCopy = () => {
@@ -60,7 +56,7 @@ export const BookModal: React.FC<BookModalProps> = ({ reflection, moodConfig, on
                 </div>
 
                 <footer className="p-6 border-t border-gray-700">
-                    {reflection.tags.length > 0 && (
+                    {reflection.tags && reflection.tags.length > 0 && (
                         <div className="flex flex-wrap gap-2 mb-6">
                             {reflection.tags.map((tag: string) => (
                                 <span key={tag} className="bg-gray-700 text-gray-300 text-xs font-mono px-2.5 py-1 rounded-full">{tag}</span>

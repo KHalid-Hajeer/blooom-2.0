@@ -1,3 +1,4 @@
+// src/lib/memory.ts
 import { v4 as uuidv4 } from 'uuid';
 
 export type MemoryType = "reflection" | "mood" | "chat" | "journey" | "goal" | "anchor";
@@ -48,8 +49,6 @@ const initialMemories: Memory[] = [
     }
 ];
 
-
-// --- Memory Store ---
 // A singleton class to manage memories, simulating a database with localStorage.
 class MemoryStoreSingleton {
   private memories: Memory[] = [];
@@ -60,12 +59,17 @@ class MemoryStoreSingleton {
   }
 
   private loadMemories() {
+    // This check is crucial: only access localStorage if in the browser.
+    if (typeof window === 'undefined') {
+        this.memories = initialMemories;
+        return;
+    }
+    
     try {
       const storedMemories = localStorage.getItem(this.STORAGE_KEY);
       if (storedMemories) {
         this.memories = JSON.parse(storedMemories);
       } else {
-        // If no stored memories, initialize with mock data
         this.memories = initialMemories;
         this.saveMemories();
       }
@@ -76,6 +80,7 @@ class MemoryStoreSingleton {
   }
 
   private saveMemories() {
+    if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.memories));
     } catch (error) {
@@ -92,7 +97,6 @@ class MemoryStoreSingleton {
       ...memoryData,
       id: uuidv4(),
       timestamp: new Date().toISOString(),
-      // New memories appear near the center
       coordinates: {
         x: (Math.random() - 0.5) * 100,
         y: (Math.random() - 0.5) * 100
@@ -108,5 +112,15 @@ class MemoryStoreSingleton {
   }
 }
 
-// Export a single instance of the store
-export const MemoryStore = new MemoryStoreSingleton();
+// FIX: Export a function to safely instantiate the store only on the client-side.
+let memoryStore: MemoryStoreSingleton | null = null;
+
+export const getMemoryStore = () => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  if (!memoryStore) {
+    memoryStore = new MemoryStoreSingleton();
+  }
+  return memoryStore;
+};
