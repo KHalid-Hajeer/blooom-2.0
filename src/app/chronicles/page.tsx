@@ -4,23 +4,14 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { PlusIcon } from '../../components/chronicle/Icons';
 import { WritingModal } from '../../components/chronicle/WritingModal';
-import { BookModal } from '../../components/chronicle/BookModal';
+import { BookModal, MoodConfig } from '../../components/chronicle/BookModal'; // Import MoodConfig here
 import Toast from '../../components/chronicle/Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 
-// Types and Configs
-export const moodConfig = {
-    joy: { color: 'bg-yellow-300', gradient: 'from-yellow-400 to-amber-200' },
-    sadness: { color: 'bg-blue-400', gradient: 'from-blue-500 to-sky-300' },
-    anger: { color: 'bg-red-500', gradient: 'from-red-600 to-rose-400' },
-    calm: { color: 'bg-teal-300', gradient: 'from-teal-400 to-cyan-200' },
-    powerful: { color: 'bg-indigo-500', gradient: 'from-indigo-600 to-purple-400' },
-    thoughtful: { color: 'bg-gray-400', gradient: 'from-gray-500 to-slate-300' },
-};
-export type Mood = keyof typeof moodConfig;
-export const moods = Object.keys(moodConfig) as Mood[];
+// Import the configuration from a separate file
+import { moodConfig, moods, Mood } from '@/data/moods';
 
 export type Reflection = {
   id: number; title: string; content: string; mood: Mood; date: string;
@@ -44,10 +35,9 @@ export default function ChroniclePage() {
     const [editingReflection, setEditingReflection] = useState<Reflection | null>(null);
     const [toastMessage, setToastMessage] = useState('');
     const [showToast, setShowToast] = useState(false);
-    const [isOnboarding] = useState(false); // Onboarding state remains client-side
+    const [isOnboarding] = useState(false);
     const [, setHasWrittenOnboarding] = useState(false);
 
-    // Filters
     const [searchTerm] = useState('');
     const [moodFilter] = useState<Mood | 'all'>('all');
     const [showArchived] = useState(false);
@@ -98,7 +88,7 @@ export default function ChroniclePage() {
             showNotification("Reflection planted!");
         }
 
-        await fetchReflections(); // Re-fetch data
+        await fetchReflections();
         setEditingReflection(null);
         setWritingModalOpen(false);
         if (isOnboarding) setHasWrittenOnboarding(true);
@@ -142,15 +132,10 @@ export default function ChroniclePage() {
         <>
             <Toast message={toastMessage} show={showToast} />
             <div className="bg-gray-900 text-white min-h-screen p-4 sm:p-8 flex flex-col">
-                {/* Onboarding logic remains client-side */}
                 <header className="text-center mb-4 z-10">
                     <h1 className="text-3xl sm:text-4xl font-display tracking-wide">📖 REFLECTION CHRONICLE</h1>
                     <p className="text-white/60 font-body text-sm sm:text-base">The Library of You</p>
                 </header>
-
-                <div className="w-full max-w-4xl mx-auto mb-6 z-10 space-y-4">
-                    {/* Filters UI remains the same */}
-                </div>
 
                 <main className="flex-grow flex items-center justify-center z-10 w-full overflow-hidden">
                     {loading ? (
@@ -202,7 +187,7 @@ export default function ChroniclePage() {
                     {activeReflection && (
                         <BookModal
                             reflection={activeReflection}
-                            moodConfig={moodConfig}
+                            moodConfig={moodConfig as MoodConfig}
                             onClose={() => setActiveReflection(null)}
                             onEdit={handleEdit}
                             onArchive={handleArchive}
