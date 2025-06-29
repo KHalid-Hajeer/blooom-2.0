@@ -46,8 +46,7 @@ function formatSystem(raw: RawSystem): System {
     y: raw.y_pos,
     createdAt: new Date(raw.created_at),
     lastTended: raw.last_tended ?? undefined,
-    logs: raw.system_logs
-      .map((log): SystemLog => ({
+    logs: (raw.system_logs || []).map((log): SystemLog => ({
         id: log.id,
         note: log.note,
         mood: log.mood,
@@ -57,6 +56,8 @@ function formatSystem(raw: RawSystem): System {
   };
 }
 
+const PENDING_SYSTEM_KEY = 'bloom_pending_system';
+
 export default function GardenPage() {
   const { user } = useAuth();
   const [systems, setSystems] = useState<System[]>([]);
@@ -64,9 +65,21 @@ export default function GardenPage() {
   const [activeSystem, setActiveSystem] = useState<System | null>(null);
   const [viewMode, setViewMode] = useState("freeform");
   const [loading, setLoading] = useState(true);
+  const [submissionStatus, setSubmissionStatus] = useState({ isLoading: false, error: null as string | null });
 
   const fetchSystems = useCallback(async () => {
-    if (!user) return;
+    // Handle unauthenticated user first
+    if (!user) {
+        const pendingSystemJSON = localStorage.getItem(PENDING_SYSTEM_KEY);
+        if (pendingSystemJSON) {
+            const pendingSystem = JSON.parse(pendingSystemJSON);
+            setSystems([pendingSystem]);
+        }
+        setLoading(false);
+        return;
+    };
+    
+    // Handle authenticated user
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -87,15 +100,13 @@ export default function GardenPage() {
   }, [user]);
 
   useEffect(() => {
-    if (user) {
-      fetchSystems();
-    } else {
-      setLoading(false);
-      setSystems([]);
-    }
-  }, [user, fetchSystems]);
+    fetchSystems();
+  }, [fetchSystems]);
 
-  const handleOpenPlantModal = () => setModal("plant");
+  const handleOpenPlantModal = () => {
+    setSubmissionStatus({ isLoading: false, error: null });
+    setModal("plant");
+  };
   
   const handleOpenTendModal = (system: System) => {
     setActiveSystem(system);
@@ -107,14 +118,36 @@ export default function GardenPage() {
     setModal("detail");
   };
 
-  // FIX: Wrapped handleCloseModal in useCallback to prevent re-renders.
   const handleCloseModal = useCallback(() => {
     setModal(null);
     setActiveSystem(null);
   }, []);
 
   const handlePlantSystem = useCallback(async (data: { name: string; description: string; color: string; }) => {
-    if (!user) return;
+    setSubmissionStatus({ isLoading: true, error: null });
+    
+    // If user is not logged in, save to localStorage
+    if (!user) {
+        const pendingSystem: System = {
+            id: Date.now(), // Use a temporary ID for the key
+            ...data,
+            stage: 'seed',
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            createdAt: new Date(),
+            logs: [],
+        };
+        localStorage.setItem(PENDING_SYSTEM_KEY, JSON.stringify(pendingSystem));
+        setSystems([pendingSystem]);
+        setSubmissionStatus({ isLoading: false, error: null });
+        handleCloseModal();
+        // This is where you would typically trigger the next step of onboarding
+        // For example, by using the router to navigate to the signup page.
+        // router.push('/onboarding/create-account');
+        return;
+    }
+
+    // Authenticated User Logic
     try {
       const { data: newSystemData, error } = await supabase
         .from("systems")
@@ -132,11 +165,11 @@ export default function GardenPage() {
 
       if (newSystemData) {
         setSystems(prevSystems => [...prevSystems, formatSystem(newSystemData as RawSystem)]);
+        handleCloseModal();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error planting system:", error);
-    } finally {
-      handleCloseModal();
+      setSubmissionStatus({ isLoading: false, error: error.message || "An unknown error occurred." });
     }
   }, [user, handleCloseModal]);
 
@@ -174,6 +207,8 @@ export default function GardenPage() {
   }, [activeSystem, user, handleCloseModal]);
 
   const handleDragEnd = useCallback(async (id: number, info: PanInfo) => {
+    if (!user) return; // Prevent dragging for unauthenticated users
+
     const originalSystem = systems.find((s) => s.id === id);
     if (!originalSystem) return;
 
@@ -194,9 +229,10 @@ export default function GardenPage() {
       console.error("Error updating system position:", error);
       setSystems(currentSystems => currentSystems.map((s) => s.id === id ? originalSystem : s));
     }
-  }, [systems]);
+  }, [systems, user]);
 
   const handleUpdateSystem = useCallback(async (systemId: number, updates: { name: string; description: string }) => {
+    if (!user) return;
     try {
         const { data: updatedSystem, error } = await supabase
             .from("systems")
@@ -213,9 +249,10 @@ export default function GardenPage() {
     } catch(error) {
         console.error("Error updating system:", error);
     }
-  }, []);
+  }, [user]);
 
   const handleDeleteLog = useCallback(async (systemId: number, logId: number) => {
+    if (!user) return;
     try {
       const { error } = await supabase.from("system_logs").delete().eq("id", logId);
       if (error) throw error;
@@ -231,9 +268,15 @@ export default function GardenPage() {
     } catch (error) {
       console.error("Error deleting log:", error);
     }
-  }, []);
+  }, [user]);
 
   const handleUnplantSystem = useCallback(async (systemId: number) => {
+    if (!user) {
+        localStorage.removeItem(PENDING_SYSTEM_KEY);
+        setSystems([]);
+        handleCloseModal();
+        return;
+    }
     try {
         const { error } = await supabase.from("systems").delete().eq("id", systemId);
         if (error) throw error;
@@ -243,7 +286,7 @@ export default function GardenPage() {
     } catch (error) {
         console.error("Error unplanting system:", error);
     }
-  }, [handleCloseModal]);
+  }, [user, handleCloseModal]);
   
   if (loading) {
     return (
@@ -272,6 +315,8 @@ export default function GardenPage() {
         <PlantSystemModal
           onClose={handleCloseModal}
           onSubmit={handlePlantSystem}
+          isLoading={submissionStatus.isLoading}
+          error={submissionStatus.error}
         />
       )}
       {modal === "tend" && activeSystem && (

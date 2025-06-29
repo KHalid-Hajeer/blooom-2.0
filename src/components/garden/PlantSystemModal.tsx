@@ -7,16 +7,20 @@ const themeColors = ["#98D7A5", "#D7BDE2", "#F9C1B1", "#A2D2FF", "#FFE07D", "#E4
 export default function PlantSystemModal({
   onClose,
   onSubmit,
+  isLoading,
+  error,
 }: {
   onClose: () => void;
   onSubmit: (data: { name: string; description: string; color: string }) => void;
+  isLoading: boolean;
+  error: string | null;
 }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState(themeColors[0]);
 
   const handleSubmit = () => {
-    if (name.trim()) {
+    if (name.trim() && !isLoading) {
       onSubmit({ name, description, color });
     }
   };
@@ -32,7 +36,6 @@ export default function PlantSystemModal({
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        {/* 6. Added description textarea */}
         <textarea
             placeholder="What is the intention behind this system?"
             className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
@@ -41,7 +44,7 @@ export default function PlantSystemModal({
             onChange={(e) => setDescription(e.target.value)}
         />
         <div>
-          <label className="block text-sm font-medium mb-2">🎨 Pick a Theme</label>
+          <label className="block text-sm font-medium mb-2">🎨 Pick a Theme Color</label>
           <div className="flex gap-2">
             {themeColors.map((c) => (
               <div
@@ -53,9 +56,17 @@ export default function PlantSystemModal({
             ))}
           </div>
         </div>
+        {/* FIX: Display error message if it exists */}
+        {error && <p className="text-sm text-red-500">Error: {error}</p>}
         <div className="flex justify-end gap-3 pt-4">
           <button className="text-sm text-gray-600 hover:underline" onClick={onClose}>Cancel</button>
-          <button onClick={handleSubmit} className="px-5 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition">Plant Seed</button>
+          <button
+            onClick={handleSubmit}
+            disabled={!name.trim() || isLoading}
+            className="px-5 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            {isLoading ? "Planting..." : "Plant Seed"}
+          </button>
         </div>
       </div>
     </div>

@@ -8,6 +8,33 @@ import { supabase } from "@/lib/supabaseClient";
 import InteractiveGradient from "@/components/animation/interactive-gradient";
 import Typewriter from "@/components/animation/typewriter";
 import Link from "next/link";
+import { User } from "@supabase/supabase-js";
+
+const PENDING_SYSTEM_KEY = 'bloom_pending_system';
+
+// FIX: New function to save the pending system from localStorage
+const savePendingSystem = async (user: User) => {
+    const pendingSystemJSON = localStorage.getItem(PENDING_SYSTEM_KEY);
+    if (pendingSystemJSON) {
+        const systemData = JSON.parse(pendingSystemJSON);
+        try {
+            const { error } = await supabase.from('systems').insert({
+                name: systemData.name,
+                description: systemData.description,
+                color: systemData.color,
+                stage: systemData.stage,
+                x_pos: systemData.x,
+                y_pos: systemData.y,
+                user_id: user.id,
+            });
+            if (error) throw error;
+            localStorage.removeItem(PENDING_SYSTEM_KEY); // Clear it after successful save
+        } catch (error) {
+            console.error("Failed to save pending system:", error);
+            // Don't remove the key, so we can try again later
+        }
+    }
+};
 
 export default function CreateAccountPage() {
   const router = useRouter();
@@ -24,12 +51,6 @@ export default function CreateAccountPage() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        // You can add user metadata here if needed
-        // data: {
-        //   full_name: name,
-        // }
-      }
     });
 
     if (error) {
@@ -39,12 +60,13 @@ export default function CreateAccountPage() {
     } 
     else {
       setMessage("Success! Please check your email to confirm your account.");
-      // In a real app with email confirmation, you'd wait here.
-      // For this example, we'll auto-login and redirect.
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if(signInError) {
         setError(signInError.message);
-      } else {
+      } else if (user) {
+        // FIX: Call the save function after successful login
+        await savePendingSystem(user);
+        
         localStorage.setItem('onboardingCompleted', 'true');
         localStorage.removeItem('onboardingStep');
         router.push("/hub");
