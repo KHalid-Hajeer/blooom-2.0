@@ -1,45 +1,75 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { journeys } from "@/data/journeys";
+import { journeys } from "../../data/journeys";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
-import OnboardingNextButton from "@/components/ui/OnboardingNextButton";
+import { useAuth } from "../AuthContext";
+import { supabase } from "../../lib/supabaseClient";
+import OnboardingNextButton from "../../components/ui/OnboardingNextButton";
+
+interface ProgressMap {
+  [id: string]: number;
+}
 
 export default function ChooseJourneyPage() {
-  const [progressMap, setProgressMap] = useState<{ [id: string]: number }>({});
+  const { user } = useAuth();
+  const [progressMap, setProgressMap] = useState<ProgressMap>({});
+  const [loading, setLoading] = useState(true);
   const [isOnboarding, setIsOnboarding] = useState(false);
-  const router = useRouter();
+
+  const calculateProgress = useCallback((journeyId: string, completedStages: number[] | null) => {
+    const journey = journeys.find(j => j.id === journeyId);
+    if (!journey || !completedStages || completedStages.length === 0) return 0;
+    return (completedStages.length / journey.stages.length) * 100;
+  }, []);
   
   useEffect(() => {
-    const map: { [id: string]: number } = {};
-    journeys.forEach((j) => {
-      const raw = localStorage.getItem(`journey-progress-${j.id}`);
-      try {
-        const parsed = raw ? JSON.parse(raw) : [];
-        map[j.id] = Array.isArray(parsed)
-          ? (parsed.length / j.stages.length) * 100
-          : 0;
-      } catch {
-        map[j.id] = 0;
+    const fetchProgress = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
       }
-    });
-    setProgressMap(map);
+      
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('journey_progress')
+        .select('journey_id, completed_stages')
+        .eq('user_id', user.id);
+        
+      if (error) {
+        console.error("Error fetching journey progress:", error);
+        setLoading(false);
+        return;
+      }
+      
+      const newProgressMap: ProgressMap = {};
+      journeys.forEach(j => {
+        const progress = data.find(p => p.journey_id === j.id);
+        newProgressMap[j.id] = calculateProgress(j.id, progress?.completed_stages || []);
+      });
+      setProgressMap(newProgressMap);
+      setLoading(false);
+    };
 
+    fetchProgress();
+
+    // Onboarding logic remains client-side
     const step = localStorage.getItem('onboardingStep');
     if (step === '1') {
       setIsOnboarding(true);
     }
-  }, []);
+  }, [user, calculateProgress]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#101019] to-[#1c1c2c] p-6 text-white flex flex-col">
-      <nav className="absolute top-4 left-4 z-10">
-          <Link href="/hub" className="text-white/70 hover:text-white transition">
-            ← Back to Hub
-          </Link>
-      </nav>
+      {!isOnboarding && (
+        <nav className="absolute top-4 left-4 z-10">
+            <Link href="/hub" className="text-white/70 hover:text-white transition">
+              ← Back to Hub
+            </Link>
+        </nav>
+      )}
 
       {isOnboarding && <OnboardingNextButton nextStep={2} nextPath="/hub" />}
 
@@ -54,36 +84,40 @@ export default function ChooseJourneyPage() {
             </p>
         )}
 
-        <div className="flex flex-wrap gap-8 items-center justify-center">
-            {journeys.map((journey) => (
-            <motion.div
-                key={journey.id}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="relative inline-block w-full max-w-xs p-6 bg-white/5 rounded-2xl shadow-md border border-white/10 text-white hover:shadow-lg transition-all"
-            >
-                <Link href={`/journeys/${journey.id}`} className="block w-full h-full">
-                  <div className="flex flex-col h-full justify-between">
-                    <h2
-                      className="text-xl font-bold mb-2"
-                      style={{ color: journey.color }}
-                    >
-                      🛤️ {journey.title}
-                    </h2>
-                    <div className="mt-4 text-white/70 text-sm">
-                      {journey.stages.length} stages of gentle transformation
+        {loading ? (
+          <p>Loading journeys...</p>
+        ) : (
+          <div className="flex flex-wrap gap-8 items-center justify-center">
+              {journeys.map((journey) => (
+              <motion.div
+                  key={journey.id}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="relative inline-block w-full max-w-xs p-6 bg-white/5 rounded-2xl shadow-md border border-white/10 text-white hover:shadow-lg transition-all"
+              >
+                  <Link href={`/journeys/${journey.id}`} className="block w-full h-full">
+                    <div className="flex flex-col h-full justify-between">
+                      <h2
+                        className="text-xl font-bold mb-2"
+                        style={{ color: journey.color }}
+                      >
+                        🛤️ {journey.title}
+                      </h2>
+                      <div className="mt-4 text-white/70 text-sm">
+                        {journey.stages.length} stages of gentle transformation
+                      </div>
+                      <div className="mt-6 h-2 w-full bg-white/10 rounded-full">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{ width: `${progressMap[journey.id] || 0}%`, backgroundColor: journey.color }}
+                        />
+                      </div>
                     </div>
-                    <div className="mt-6 h-2 w-full bg-white/10 rounded-full">
-                      <div
-                        className="h-full rounded-full bg-white/50 transition-all duration-500"
-                        style={{ width: `${progressMap[journey.id] || 0}%` }}
-                      />
-                    </div>
-                  </div>
-                </Link>
-            </motion.div>
-            ))}
-        </div>
+                  </Link>
+              </motion.div>
+              ))}
+          </div>
+        )}
       </div>
     </div>
   );

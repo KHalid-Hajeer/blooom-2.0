@@ -1,101 +1,142 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
-import { motion } from "framer-motion";
-import { getJourneyById } from "@/data/journeys";
+import { motion, AnimatePresence } from "framer-motion";
+import { getJourneyById } from "../../../data/journeys";
+import { useAuth } from "../../AuthContext";
+import { supabase } from "../../../lib/supabaseClient";
 
 export default function JourneyPage() {
+  const { user } = useAuth();
   const { journey } = useParams();
   const journeyData = getJourneyById(journey as string);
+
   const [completedStages, setCompletedStages] = useState<number[]>([]);
-  const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProgress = useCallback(async () => {
+    if (!user || !journey) return;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('journey_progress')
+      .select('completed_stages')
+      .eq('user_id', user.id)
+      .eq('journey_id', journey)
+      .single();
+    
+    if (data?.completed_stages) {
+      setCompletedStages(data.completed_stages);
+    } else if (error && error.code !== 'PGRST116') { // Ignore "No rows found" error
+        console.error("Error fetching progress:", error);
+    }
+    setLoading(false);
+  }, [user, journey]);
 
   useEffect(() => {
-    setMounted(true);
-    if (journey) {
-      const savedProgress = localStorage.getItem(`journey-progress-${journey}`);
-      if (savedProgress) {
-        try {
-          const parsed = JSON.parse(savedProgress);
-          if (Array.isArray(parsed)) {
-            setCompletedStages(parsed);
-          }
-        } catch (e) {
-          console.error("Failed to parse journey progress", e);
-        }
-      }
+    if (user) {
+      fetchProgress();
+    } else {
+      setLoading(false);
     }
-  }, [journey]);
+  }, [user, fetchProgress]);
 
-  const handleCompleteStage = (index: number) => {
-    if (!completedStages.includes(index)) {
-      const updated = [...completedStages, index];
-      setCompletedStages(updated);
-      localStorage.setItem(`journey-progress-${journey}`, JSON.stringify(updated));
+  const currentStageIndex = completedStages.length;
+  const isJourneyComplete = journeyData ? currentStageIndex >= journeyData.stages.length : false;
+  const currentStage = journeyData && !isJourneyComplete ? journeyData.stages[currentStageIndex] : null;
+
+  const handleCompleteStage = async () => {
+    if (!user || !journeyData || !currentStage || completedStages.includes(currentStageIndex)) return;
+
+    const updatedStages = [...completedStages, currentStageIndex];
+    
+    // Upsert will create or update the record
+    const { error } = await supabase.from('journey_progress').upsert({
+      user_id: user.id,
+      journey_id: journeyData.id,
+      completed_stages: updatedStages,
+    }, { onConflict: 'user_id, journey_id' });
+
+    if (error) {
+      console.error("Error saving progress:", error);
+    } else {
+      setCompletedStages(updatedStages);
     }
   };
 
-  if (!mounted) return null;
-
-  if (!journeyData) {
-    return (
-      <div className="flex h-screen items-center justify-center text-white">
-        Journey not found.
-      </div>
-    );
-  }
+  if (loading) return <div className="flex h-screen items-center justify-center text-white bg-gradient-to-b from-[#1c1c2c] to-[#0f0f1a]">Loading your journey...</div>;
+  if (!journeyData) return <div className="flex h-screen items-center justify-center text-white">Journey not found.</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#1c1c2c] to-[#0f0f1a] p-6 text-white">
-      <h1 className="text-4xl font-semibold mb-8" style={{ color: journeyData.color }}>
+    <div className="relative min-h-screen bg-gradient-to-b from-[#1c1c2c] to-[#0f0f1a] p-6 text-white pb-32">
+      <h1 className="text-4xl font-semibold mb-8 text-center" style={{ color: journeyData.color }}>
         🛤️ {journeyData.title}
       </h1>
 
-      <div className="relative space-y-12">
-        {journeyData.stages.map((stage, index) => {
-          const completed = completedStages.includes(index);
-          return (
+      <div className="relative max-w-2xl mx-auto">
+        <AnimatePresence mode="wait">
+          {currentStage && (
             <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.15 }}
-              className={`p-6 rounded-2xl shadow-lg border border-white/10 relative backdrop-blur-md transition-all duration-300 ${
-                completed ? "border-l-4 border-[#fff3] ring-2 ring-white/10" : ""
-              }`}
+              key={currentStageIndex}
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -50, scale: 0.95 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              className="p-6 rounded-2xl shadow-lg border border-white/10 backdrop-blur-md"
             >
-              <h2 className="text-xl font-bold mb-2">{stage.title}</h2>
+              <h2 className="text-xl font-bold mb-2">{currentStage.title}</h2>
               <blockquote className="italic text-sm text-white/80 mb-4">
-                “{stage.quote}”
+                “{currentStage.quote}”
               </blockquote>
               <div className="mb-2">
-                <strong>Grounding Practice:</strong> {stage.grounding}
+                <strong>Grounding Practice:</strong> {currentStage.grounding}
               </div>
               <div className="mb-2">
-                <strong>Reflection Prompt:</strong> {stage.reflection}
+                <strong>Reflection Prompt:</strong> {currentStage.reflection}
               </div>
-              {stage.practice && (
+              {currentStage.practice && (
                 <div className="mb-4">
-                  <strong>Optional Practice:</strong> {stage.practice}
+                  <strong>Optional Practice:</strong> {currentStage.practice}
                 </div>
               )}
               <button
-                onClick={() => handleCompleteStage(index)}
-                className={`mt-2 rounded-xl px-4 py-2 text-sm transition ${
-                  completed ? "bg-green-800/20 cursor-default" : "bg-white/10 hover:bg-white/20"
-                }`}
-                disabled={completed}
+                onClick={handleCompleteStage}
+                className="mt-4 rounded-xl px-4 py-2 text-sm transition bg-white/10 hover:bg-white/20"
               >
-                {completed ? "🌟 Stage Completed" : "🌿 Tend this stage"}
+                🌿 Tend this stage
               </button>
-              {completed && (
-                <div className="absolute top-2 right-2 w-3 h-3 bg-white rounded-full animate-pulse" />
-              )}
             </motion.div>
-          );
-        })}
+          )}
+
+          {isJourneyComplete && (
+            <motion.div
+              key="completion"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              className="text-center p-8 bg-black/20 rounded-xl"
+            >
+              <h2 className="text-2xl font-bold mb-2">🌟 Journey Complete!</h2>
+              <p className="text-white/80">You've walked the path. Take a moment to honor your progress.</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
+
+      {/* Floating button to return to the main journeys page */}
+      <Link href="/journeys" passHref>
+        <motion.a
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0, transition: { delay: 0.5 } }}
+          className={`fixed bottom-8 right-8 z-20 px-4 py-2 rounded-lg shadow-lg text-sm font-semibold transition-colors ${
+            isJourneyComplete ? "bg-green-500 hover:bg-green-600 text-white" : "bg-white/20 hover:bg-white/30 text-white"
+          }`}
+        >
+          {isJourneyComplete ? "Return to All Journeys" : "← Back to Journeys"}
+        </motion.a>
+      </Link>
     </div>
   );
 }

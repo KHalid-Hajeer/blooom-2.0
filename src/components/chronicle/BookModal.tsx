@@ -1,31 +1,50 @@
 // src/components/chronicle/BookModal.tsx
 import React from 'react';
-import { Reflection, MoodConfig } from '@/app/chronicles/page'; // Adjusted import path
+import { Reflection } from '@/app/chronicles/page';
 import { EditIcon, ArchiveIcon, CopyIcon, StarIcon } from './Icons';
+import { motion } from 'framer-motion';
 
+// The moodConfig type needs to be defined here or imported if it's in a shared types file
+export type MoodConfig = {
+    [key: string]: {
+        color: string;
+        gradient: string;
+    }
+}
 interface BookModalProps {
-    reflection: Reflection | null;
+    reflection: Reflection;
     moodConfig: MoodConfig;
     onClose: () => void;
     onEdit: (reflection: Reflection) => void;
     onArchive: (id: number) => void;
     onStar: (id: number) => void;
-    onCopy: (text: string) => void;
+    onCopy: (message: string) => void;
 }
 
 export const BookModal: React.FC<BookModalProps> = ({ reflection, moodConfig, onClose, onEdit, onArchive, onStar, onCopy }) => {
-    if (!reflection) return null;
     
     const moodStyle = moodConfig[reflection.mood];
-    const fullText = `Title: ${reflection.title}\nDate: ${reflection.date}\nMood: ${reflection.mood}\n\n${reflection.content}`;
+    const fullTextToCopy = `Title: ${reflection.title}\nDate: ${reflection.date}\nMood: ${reflection.mood}\n\n${reflection.content}`;
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(fullTextToCopy);
+        onCopy('Copied to clipboard!');
+    };
 
     return (
-        <div 
-            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm animate-fade-in"
+        <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
             onClick={onClose}
         >
-            <div 
-                className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col transform transition-all duration-300 scale-95 animate-slide-up"
+            <motion.div 
+                initial={{ y: 50, opacity: 0, scale: 0.95 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: 50, opacity: 0, scale: 0.95 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+                className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
                 <header className={`p-6 rounded-t-xl bg-gradient-to-r ${moodStyle.gradient} text-black relative`}>
@@ -52,15 +71,15 @@ export const BookModal: React.FC<BookModalProps> = ({ reflection, moodConfig, on
                         <div className="flex gap-2 text-gray-400">
                            <button onClick={() => onEdit(reflection)} title="Edit" className="p-2 rounded-full hover:bg-gray-700 hover:text-white transition"><EditIcon /></button>
                            <button onClick={() => onArchive(reflection.id)} title={reflection.archived ? "Unarchive" : "Archive"} className="p-2 rounded-full hover:bg-gray-700 hover:text-white transition"><ArchiveIcon /></button>
-                           <button onClick={() => onCopy(fullText)} title="Copy to Clipboard" className="p-2 rounded-full hover:bg-gray-700 hover:text-white transition"><CopyIcon /></button>
+                           <button onClick={handleCopy} title="Copy to Clipboard" className="p-2 rounded-full hover:bg-gray-700 hover:text-white transition"><CopyIcon /></button>
                         </div>
                         <button onClick={() => onStar(reflection.id)} title="Star as Memory" className={`p-2 rounded-full transition flex items-center gap-2 px-4 ${reflection.starred ? 'text-yellow-400 bg-yellow-400/10 hover:bg-yellow-400/20' : 'text-gray-400 hover:bg-gray-700 hover:text-yellow-400'}`}>
-                            <StarIcon className="w-5 h-5"/>
+                            <StarIcon className={`w-5 h-5 transition-transform ${reflection.starred ? 'scale-110' : ''}`} />
                             <span className="font-semibold text-sm">{reflection.starred ? 'Starred Memory' : 'Star as Memory'}</span>
                         </button>
                     </div>
                 </footer>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 };

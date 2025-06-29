@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Lora, Inter } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "./AuthContext";
 
 // Font setup
 const fontDisplay = Lora({
@@ -32,7 +33,9 @@ export default function RootLayout({
         <meta charSet="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="theme-color" content="#1e1e24" />
       </head>
       <body className="font-body" style={{ background: "linear-gradient(180deg, var(--color-heavy-start), var(--color-heavy-end))", color: "rgba(255,255,255,0.9)" }}>
-        <main>{children}</main>
+        <AuthProvider>
+          <main>{children}</main>
+        </AuthProvider>
       </body>
     </html>
   );

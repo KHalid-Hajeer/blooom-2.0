@@ -1,89 +1,139 @@
 // src/app/garden/page.tsx
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { PanInfo } from "framer-motion";
-import GardenCanvas from "@/components/garden/GardenCanvas";
-import PlantSystemModal from "@/components/garden/PlantSystemModal";
-import TendSystemModal from "@/components/garden/TendSystemModal";
-import SystemDetailModal from "@/components/garden/SystemDetailModal";
-import FloatingButton from "@/components/ui/FloatingButton";
-import ViewModeToggle from "@/components/garden/ViewModeToggle";
-import InteractiveGradient from "@/components/animation/interactive-gradient";
-import { System, SystemLog } from "@/lib/growthtypes";
-import OnboardingNextButton from "@/components/ui/OnboardingNextButton";
-
-const initialSystems: System[] = [];
+import GardenCanvas from "../../components/garden/GardenCanvas";
+import PlantSystemModal from "../../components/garden/PlantSystemModal";
+import TendSystemModal from "../../components/garden/TendSystemModal";
+import SystemDetailModal from "../../components/garden/SystemDetailModal";
+import FloatingButton from "../../components/ui/FloatingButton";
+import ViewModeToggle from "../../components/garden/ViewModeToggle";
+import InteractiveGradient from "../../components/animation/interactive-gradient";
+import { System, SystemLog } from "../../lib/growthtypes";
+import { useAuth } from "../AuthContext";
+import { supabase } from "../../lib/supabaseClient";
 
 export default function GardenPage() {
+  const { user } = useAuth();
   const [systems, setSystems] = useState<System[]>([]);
   const [modal, setModal] = useState<"plant" | "tend" | "detail" | null>(null);
   const [activeSystem, setActiveSystem] = useState<System | null>(null);
   const [viewMode, setViewMode] = useState("freeform");
-  const [isOnboarding, setIsOnboarding] = useState(false);
-  const [hasPlantedOnboarding, setHasPlantedOnboarding] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const fetchSystems = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('systems')
+      .select('*, system_logs(*)')
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error("Error fetching systems:", error);
+    } else if (data) {
+      const formattedSystems = data.map((s: any) => ({
+        ...s,
+        x: s.x_pos,
+        y: s.y_pos,
+        createdAt: new Date(s.created_at),
+        logs: s.system_logs.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
+      }));
+      setSystems(formattedSystems);
+    }
+    setLoading(false);
+  }, [user]);
 
   useEffect(() => {
-    const step = localStorage.getItem('onboardingStep');
-    if (step === '0') {
-      setIsOnboarding(true);
-      // Use sessionStorage to ensure the prompt only appears once per session
-      if (systems.length === 0 && !sessionStorage.getItem('promptedToPlant')) {
-        setTimeout(() => setModal("plant"), 1200);
-        sessionStorage.setItem('promptedToPlant', 'true');
-      }
+    if (user) {
+      fetchSystems();
+    } else {
+      setLoading(false);
     }
-  }, [systems.length]);
+  }, [user, fetchSystems]);
 
   const handleOpenPlantModal = () => setModal("plant");
   const handleOpenTendModal = (system: System) => { setActiveSystem(system); setModal("tend"); };
   const handleViewSystemLogs = (system: System) => { setActiveSystem(system); setModal("detail"); };
-  const handleCloseModal = () => setModal(null);
+  const handleCloseModal = () => { setModal(null); setActiveSystem(null); };
 
-  const handlePlantSystem = (data: { name: string; description: string; color: string }) => {
-    const newSystem: System = {
-        ...data, id: Date.now(), stage: 'planted',
-        x: window.innerWidth / 2, y: window.innerHeight / 2,
-        lastTended: "Just now", createdAt: new Date(), logs: [],
-    };
-    setSystems(prev => [...prev, newSystem]);
-    setModal(null);
-    if (isOnboarding) {
-        setHasPlantedOnboarding(true);
+  const handlePlantSystem = async (data: { name: string; description: string; color: string }) => {
+    if (!user) return;
+    const { data: newSystemData, error } = await supabase
+      .from('systems')
+      .insert({
+        ...data,
+        user_id: user.id,
+        x_pos: window.innerWidth / 2,
+        y_pos: window.innerHeight / 2,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error planting system:", error);
+    } else if (newSystemData) {
+      await fetchSystems(); // Re-fetch to get the latest state
     }
-  };
-
-  const handleTendSystem = (data: { note: string; mood: string }) => {
-    if (!activeSystem) return;
-    const newLog: SystemLog = { id: Date.now(), date: new Date().toISOString().split('T')[0], ...data };
-    setSystems(systems.map(s => (s.id === activeSystem.id ? { ...s, logs: [newLog, ...s.logs] } : s)));
     handleCloseModal();
   };
 
-  const handleDragEnd = (id: number, info: PanInfo) => {
-      setSystems(systems.map(s => s.id === id ? { ...s, x: s.x + info.offset.x, y: s.y + info.offset.y } : s));
-  };
-  
-  const handleUpdateSystem = (systemId: number, updates: { name: string; description: string }) => {
-    setSystems(systems.map(s => s.id === systemId ? { ...s, ...updates } : s));
-  };
-  
-  const handleDeleteLog = (systemId: number, logId: number) => {
-    setSystems(systems.map(s => s.id === systemId ? { ...s, logs: s.logs.filter(log => log.id !== logId) } : s));
-  };
+  const handleTendSystem = async (data: { note: string; mood: string }) => {
+    if (!activeSystem || !user) return;
+    
+    // Add the log
+    await supabase.from('system_logs').insert({
+      ...data,
+      system_id: activeSystem.id,
+      user_id: user.id,
+    });
 
-  const handleUnplantSystem = (systemId: number) => {
-    setSystems(systems.filter(s => s.id !== systemId));
+    // Update the system's last_tended date
+    await supabase.from('systems').update({ last_tended: new Date().toISOString() }).eq('id', activeSystem.id);
+    
+    await fetchSystems();
     handleCloseModal();
   };
+
+  const handleDragEnd = async (id: number, info: PanInfo) => {
+    const system = systems.find(s => s.id === id);
+    if (!system) return;
+    const newX = system.x + info.offset.x;
+    const newY = system.y + info.offset.y;
+
+    // Update local state immediately for responsiveness
+    setSystems(systems.map(s => s.id === id ? { ...s, x: newX, y: newY } : s));
+    
+    await supabase
+      .from('systems')
+      .update({ x_pos: newX, y_pos: newY })
+      .eq('id', id);
+  };
+  
+  const handleUpdateSystem = async (systemId: number, updates: { name: string; description: string }) => {
+    await supabase.from('systems').update(updates).eq('id', systemId);
+    await fetchSystems();
+  };
+  
+  const handleDeleteLog = async (systemId: number, logId: number) => {
+    await supabase.from('system_logs').delete().eq('id', logId);
+    await fetchSystems();
+  };
+
+  const handleUnplantSystem = async (systemId: number) => {
+    await supabase.from('systems').delete().eq('id', systemId);
+    await fetchSystems();
+    handleCloseModal();
+  };
+
+  if (loading) {
+    return <div className="w-screen h-screen flex items-center justify-center text-white bg-[#e7f5ed]">Loading your garden...</div>
+  }
 
   return (
     <div className="relative h-screen w-screen overflow-hidden text-white bg-[#e7f5ed]">
       <InteractiveGradient startColor="#ffffff" endColor="#e7f5ed" />
       
-      {isOnboarding && hasPlantedOnboarding && (
-        <OnboardingNextButton nextStep={1} nextPath="/hub" />
-      )}
-
       <GardenCanvas 
         systems={systems} 
         viewMode={viewMode}
