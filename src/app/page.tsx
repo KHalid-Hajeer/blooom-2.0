@@ -9,7 +9,7 @@ import { wisps, type WispData } from "@/data/content";
 
 interface WispProps {
   word: string;
-  onHover: (start: string, end: string) => void;
+  onHover: (start: string, end:string) => void;
   onLeave: () => void;
   onClick: (path: string) => void;
   isActive: boolean;
@@ -88,6 +88,9 @@ const Wisp: React.FC<WispProps> = React.memo(({ word, onHover, onLeave, onClick,
     </motion.div>
   );
 });
+
+// Fix: Added a displayName to the Wisp component to resolve the ESLint error.
+Wisp.displayName = 'Wisp';
 
 export default function HomePage() {
   const router = useRouter();

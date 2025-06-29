@@ -142,13 +142,14 @@ export default function GardenPage() {
     } finally {
       handleCloseModal();
     }
-  }, [user]);
+  }, [user, handleCloseModal]);
 
   const handleTendSystem = useCallback(async (data: { note: string; mood: string }) => {
     if (!activeSystem || !user) return;
     try {
       // 1. Insert the new log
-      const { data: newLogData, error: logError } = await supabase
+      // FIX: Removed unused 'newLogData' variable.
+      const { error: logError } = await supabase
         .from("system_logs")
         .insert({ ...data, system_id: activeSystem.id, user_id: user.id })
         .select()
@@ -168,9 +169,11 @@ export default function GardenPage() {
       if (systemError) throw systemError;
       
       // OPTIMIZATION: Update the specific system in the local state
-      setSystems(prevSystems => 
-        prevSystems.map(s => s.id === activeSystem.id ? formatSystem(updatedSystemData as RawSystem) : s)
-      );
+      if (updatedSystemData) {
+        setSystems(prevSystems => 
+          prevSystems.map(s => s.id === activeSystem.id ? formatSystem(updatedSystemData as RawSystem) : s)
+        );
+      }
 
     } catch (error) {
       console.error("Error tending system:", error);
@@ -178,7 +181,7 @@ export default function GardenPage() {
     } finally {
       handleCloseModal();
     }
-  }, [activeSystem, user]);
+  }, [activeSystem, user, handleCloseModal]);
 
   const handleDragEnd = useCallback(async (id: number, info: PanInfo) => {
     const originalSystem = systems.find((s) => s.id === id);
@@ -188,7 +191,7 @@ export default function GardenPage() {
     const newY = originalSystem.y + info.offset.y;
 
     // Optimistic UI update
-    setSystems(systems.map((s) => s.id === id ? { ...s, x: newX, y: newY } : s));
+    setSystems(currentSystems => currentSystems.map((s) => s.id === id ? { ...s, x: newX, y: newY } : s));
 
     try {
       const { error } = await supabase
@@ -201,7 +204,7 @@ export default function GardenPage() {
     } catch(error) {
       console.error("Error updating system position:", error);
       // REVERT UI on failure
-      setSystems(systems.map((s) => s.id === id ? originalSystem : s));
+      setSystems(currentSystems => currentSystems.map((s) => s.id === id ? originalSystem : s));
       // NOTE: Add user-facing error feedback here
     }
   }, [systems]);
@@ -218,7 +221,9 @@ export default function GardenPage() {
         if (error) throw error;
         
         // OPTIMIZATION: Update the specific system in state
-        setSystems(prev => prev.map(s => s.id === systemId ? formatSystem(updatedSystem as RawSystem) : s));
+        if (updatedSystem) {
+          setSystems(prev => prev.map(s => s.id === systemId ? formatSystem(updatedSystem as RawSystem) : s));
+        }
     } catch(error) {
         console.error("Error updating system:", error);
         // NOTE: Add user-facing error feedback here
@@ -257,7 +262,7 @@ export default function GardenPage() {
         console.error("Error unplanting system:", error);
         // NOTE: Add user-facing error feedback here
     }
-  }, []);
+  }, [handleCloseModal]);
   
   if (loading) {
     return (
