@@ -119,7 +119,7 @@ export default function JourneyPage() {
               className="text-center p-8 bg-black/20 rounded-xl"
             >
               <h2 className="text-2xl font-bold mb-2">🌟 Journey Complete!</h2>
-              <p className="text-white/80">You've walked the path. Take a moment to honor your progress.</p>
+              <p className="text-white/80">You&apos;ve walked the path. Take a moment to honor your progress.</p>
             </motion.div>
           )}
         </AnimatePresence>

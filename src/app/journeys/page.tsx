@@ -80,7 +80,7 @@ export default function ChooseJourneyPage() {
 
         {isOnboarding && (
             <p className="text-center text-lg text-yellow-300 mb-8 animate-pulse">
-                Explore a journey, then click Next when you're ready.
+                Explore a journey, then click Next when you&apos;re ready.
             </p>
         )}
 

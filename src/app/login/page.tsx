@@ -80,7 +80,7 @@ export default function LoginPage() {
         </motion.button>
 
         <p className="text-center text-sm mt-4">
-          Don't have a space yet?{' '}
+          Don&apos;t have a space yet?{' '}
           <Link href="/onboarding/create-account" className="underline hover:text-white">
             Create one
           </Link>

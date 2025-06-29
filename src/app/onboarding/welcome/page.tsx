@@ -64,7 +64,7 @@ export default function WelcomePage() {
         transition={{ delay: 1, duration: 1 }}
         className="text-lg text-white/70 text-center mb-10 z-10"
       >
-        Let's bring it to life.
+        Let&apos;s bring it to life.
       </motion.p>
       <motion.button
         onClick={handleEnter}

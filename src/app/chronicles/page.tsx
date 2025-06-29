@@ -2,11 +2,10 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { PlusIcon, SearchIcon } from '../../components/chronicle/Icons';
+import { PlusIcon } from '../../components/chronicle/Icons';
 import { WritingModal } from '../../components/chronicle/WritingModal';
 import { BookModal } from '../../components/chronicle/BookModal';
 import Toast from '../../components/chronicle/Toast';
-import OnboardingNextButton from '../../components/ui/OnboardingNextButton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../AuthContext';
 import { supabase } from '@/lib/supabaseClient';
@@ -45,13 +44,13 @@ export default function ChroniclePage() {
     const [editingReflection, setEditingReflection] = useState<Reflection | null>(null);
     const [toastMessage, setToastMessage] = useState('');
     const [showToast, setShowToast] = useState(false);
-    const [isOnboarding, setIsOnboarding] = useState(false); // Onboarding state remains client-side
-    const [hasWrittenOnboarding, setHasWrittenOnboarding] = useState(false);
+    const [isOnboarding] = useState(false); // Onboarding state remains client-side
+    const [, setHasWrittenOnboarding] = useState(false);
 
     // Filters
-    const [searchTerm, setSearchTerm] = useState('');
-    const [moodFilter, setMoodFilter] = useState<Mood | 'all'>('all');
-    const [showArchived, setShowArchived] = useState(false);
+    const [searchTerm] = useState('');
+    const [moodFilter] = useState<Mood | 'all'>('all');
+    const [showArchived] = useState(false);
 
     const fetchReflections = useCallback(async () => {
         if (!user) return;

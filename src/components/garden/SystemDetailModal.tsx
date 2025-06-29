@@ -1,7 +1,7 @@
 // src/components/garden/SystemDetailModal.tsx
 "use client";
 import React, { useState } from "react";
-import { System, SystemLog } from "@/lib/growthtypes";
+import { System } from "@/lib/growthtypes";
 
 export default function SystemDetailModal({
   system,

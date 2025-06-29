@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Reflection, MoodConfig, Mood } from '@/app/chronicles/page'; // Adjusted import path
+import { Reflection, Mood } from '@/app/chronicles/page'; // Adjusted import path
 
 interface WritingModalProps {
     isOpen: boolean;

@@ -59,7 +59,8 @@ export default function MemorySpace({ onboardingStep }: MemorySpaceProps) {
   const planetsRef = useRef<PlanetParticle[]>([]);
   const panRef = useRef({ x: 0, y: 0 });
   const [hoveredItem, setHoveredItem] = useState<HoveredItem | null>(null);
-  const [zoomedPlanet, setZoomedPlanet] = useState<PlanetParticle | null>(null);
+  // FIX: Removed unused 'zoomedPlanet' state.
+  // const [zoomedPlanet, setZoomedPlanet] = useState<PlanetParticle | null>(null);
   
   const isOnboarding = onboardingStep !== null && onboardingStep < 999;
   
@@ -75,7 +76,8 @@ export default function MemorySpace({ onboardingStep }: MemorySpaceProps) {
     if (isOnboarding && onboardingStep !== null && planet.data.name !== planetDataList[onboardingStep].name) {
       return; // Block clicks on non-active onboarding planets
     }
-    setZoomedPlanet(planet);
+    // FIX: Removed unused state update. The timeout handles the navigation delay.
+    // setZoomedPlanet(planet); 
     setTimeout(() => {
       router.push(planet.data.route);
     }, 600);
@@ -177,7 +179,9 @@ export default function MemorySpace({ onboardingStep }: MemorySpaceProps) {
             }
         }
         setHoveredItem(currentlyHovered);
-        canvas.style.cursor = currentlyHovered ? 'pointer' : 'default';
+        if (canvas.style) {
+          canvas.style.cursor = currentlyHovered ? 'pointer' : 'default';
+        }
     };
 
     const handleClick = (e: MouseEvent) => {
@@ -204,8 +208,10 @@ export default function MemorySpace({ onboardingStep }: MemorySpaceProps) {
     return () => {
         cancelAnimationFrame(animationFrameId);
         window.removeEventListener('resize', resizeCanvas);
-        canvas.removeEventListener('mousemove', handleMouseMove);
-        canvas.removeEventListener('click', handleClick);
+        if (canvas) {
+            canvas.removeEventListener('mousemove', handleMouseMove);
+            canvas.removeEventListener('click', handleClick);
+        }
     };
   }, [visiblePlanets, router, handlePlanetClick, hoveredItem, isOnboarding, onboardingStep]);
 

@@ -29,7 +29,8 @@ export default function InteractiveStarfield() {
     const draw = () => {
       if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
-      for (let star of stars) {
+      // FIX: Changed 'let' to 'const' as 'star' is never reassigned.
+      for (const star of stars) {
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;

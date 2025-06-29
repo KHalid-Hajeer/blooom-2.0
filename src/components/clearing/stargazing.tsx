@@ -8,20 +8,25 @@ export default function Stargazing() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Store refs in variables to ensure stable values
     const canvas = canvasRef.current;
-    if (!canvas || !containerRef.current) return;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let width = (canvas.width = containerRef.current.clientWidth);
-    let height = (canvas.height = containerRef.current.clientHeight);
+    let width = (canvas.width = container.clientWidth);
+    let height = (canvas.height = container.clientHeight);
 
     const STAR_COUNT = 500;
-    let stars: { x: number; y: number; radius: number; alpha: number; isConstellation?: boolean }[] = [];
+    // FIX: Use 'const' for arrays/objects that are mutated but not reassigned.
+    const stars: { x: number; y: number; radius: number; alpha: number; isConstellation?: boolean }[] = [];
     const constellations: { points: { x: number; y: number; radius: number; alpha: number; isConstellation: boolean }[]; word: string }[] = [];
 
-    let mouse = { x: 0, y: 0 };
-    let pan = { x: 0, y: 0, targetX: 0, targetY: 0 };
+    // FIX: Use 'const' for objects whose properties are changed.
+    const mouse = { x: 0, y: 0 };
+    const pan = { x: 0, y: 0, targetX: 0, targetY: 0 };
     let isDragging = false;
     let hoveredConstellation: number | null = null;
 
@@ -93,20 +98,33 @@ export default function Stargazing() {
           const c = constellations[hoveredConstellation]; ctx.beginPath(); ctx.moveTo(c.points[0].x + pan.x, c.points[0].y + pan.y); for(let i=1; i < c.points.length; i++) ctx.lineTo(c.points[i].x + pan.x, c.points[i].y + pan.y); ctx.strokeStyle = "rgba(200, 230, 255, 0.4)"; ctx.stroke(); c.points.forEach(p => { ctx.beginPath(); ctx.arc(p.x + pan.x, p.y + pan.y, p.isConstellation ? p.radius + 1 : 5, 0, Math.PI * 2); ctx.fillStyle = "rgba(200, 230, 255, 0.9)"; ctx.shadowBlur = 15; ctx.shadowColor = "lightblue"; ctx.fill(); ctx.shadowBlur = 0; }); ctx.fillStyle = "rgba(255, 255, 255, 1)"; ctx.font = "20px var(--font-body)"; ctx.textAlign = "center"; ctx.fillText(c.word, mouse.x, mouse.y - 30);
       }
     };
-    const animate = () => { draw(); requestAnimationFrame(animate); };
+    let animationFrameId: number;
+    const animate = () => { draw(); animationFrameId = requestAnimationFrame(animate); };
     const handleMouseMove = (e: MouseEvent) => { mouse.x = e.clientX; mouse.y = e.clientY; if (isDragging) { pan.targetX += e.movementX; pan.targetY += e.movementY; } };
     const handleMouseDown = (e: MouseEvent) => { if(e.button === 0) isDragging = true; };
     const handleMouseUp = () => isDragging = false;
     const handleMouseLeave = () => isDragging = false;
-    const resizeObserver = new ResizeObserver(() => { width = canvas.width = containerRef.current!.clientWidth; height = canvas.height = containerRef.current!.clientHeight; });
-    resizeObserver.observe(containerRef.current);
-     
-    containerRef.current.addEventListener("mousemove", handleMouseMove); containerRef.current.addEventListener("mousedown", handleMouseDown); containerRef.current.addEventListener("mouseup", handleMouseUp); containerRef.current.addEventListener("mouseleave",handleMouseLeave);
-    populateUniverse(); animate();
+    const resizeObserver = new ResizeObserver(() => { width = canvas.width = container.clientWidth; height = canvas.height = container.clientHeight; });
+    
+    // FIX: Use the stable 'container' variable to add listeners and observe.
+    resizeObserver.observe(container);
+    container.addEventListener("mousemove", handleMouseMove); 
+    container.addEventListener("mousedown", handleMouseDown); 
+    container.addEventListener("mouseup", handleMouseUp); 
+    container.addEventListener("mouseleave",handleMouseLeave);
+    
+    populateUniverse(); 
+    animate();
+
     return () => {
+      cancelAnimationFrame(animationFrameId);
       resizeObserver.disconnect();
-      if (containerRef.current) {
-        containerRef.current.removeEventListener("mousemove", handleMouseMove); containerRef.current.removeEventListener("mousedown", handleMouseDown); containerRef.current.removeEventListener("mouseup", handleMouseUp); containerRef.current.removeEventListener("mouseleave", handleMouseLeave);
+      // FIX: Use the stable 'container' variable in the cleanup function.
+      if (container) {
+        container.removeEventListener("mousemove", handleMouseMove);
+        container.removeEventListener("mousedown", handleMouseDown);
+        container.removeEventListener("mouseup", handleMouseUp);
+        container.removeEventListener("mouseleave", handleMouseLeave);
       }
     };
   }, []);

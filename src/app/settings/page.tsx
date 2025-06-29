@@ -3,11 +3,8 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { Terminal } from '@/components/settings/Terminal';
-import { useRouter } from 'next/navigation';
 
 export default function SettingsPage() {
-  const router = useRouter();
-
   useEffect(() => {
     const step = localStorage.getItem('onboardingStep');
     if (step === '4') {

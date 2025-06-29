@@ -169,7 +169,7 @@ export default function PlanPage() {
 									className="px-8 py-3 rounded-xl bg-pink-500 text-white font-semibold shadow-lg hover:bg-pink-600 transition"
 									onClick={handleFoundations}
 								>
-									Let's set the foundations
+									Let&apos;s set the foundations
 								</button>
 							</>
 						)}

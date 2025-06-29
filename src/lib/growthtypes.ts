@@ -1,11 +1,12 @@
 // src/lib/types.ts
-export type SystemStage = "planted" | "sprouted" | "blooming" | "radiant";
+
+export type SystemStage = "seed" | "planted" | "sprouted" | "blooming" | "radiant";
 
 export interface SystemLog {
-  id: number; 
-  date: string;
+  id: number;
+  date: string;     // ISO timestamp of when the log was created
   note: string;
-  mood: string; 
+  mood: string;
 }
 
 export interface System {
@@ -16,7 +17,7 @@ export interface System {
   x: number;
   y: number;
   color: string;
-  lastTended: string;
+  lastTended?: string;   // ISO timestamp of last tending action
   createdAt: Date;
   logs: SystemLog[];
 }
