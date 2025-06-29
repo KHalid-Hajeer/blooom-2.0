@@ -1,3 +1,5 @@
+// src/components/space/MemorySpace.tsx
+
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
@@ -220,7 +222,7 @@ export default function MemorySpace({ onboardingStep }: MemorySpaceProps) {
             exit={{ opacity: 0, y: -20 }}
             className="absolute bottom-10 left-1/2 -translate-x-1/2 w-full max-w-2xl text-center text-white/90 text-lg p-4 z-20 font-display bg-black/30 backdrop-blur-sm rounded-xl"
           >
-            <Typewriter text={onboardingMessages[onboardingStep]} />
+            <Typewriter text={onboardingMessages[onboardingStep]} speed={60} delay={0.5} />
           </motion.div>
         }
       </AnimatePresence>

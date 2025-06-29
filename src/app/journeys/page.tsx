@@ -5,6 +5,7 @@ import Link from "next/link";
 import { journeys } from "@/data/journeys";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import OnboardingNextButton from "@/components/ui/OnboardingNextButton";
 
 export default function ChooseJourneyPage() {
   const [progressMap, setProgressMap] = useState<{ [id: string]: number }>({});
@@ -32,14 +33,6 @@ export default function ChooseJourneyPage() {
     }
   }, []);
 
-  const handleJourneyClick = (e: React.MouseEvent, journeyId: string) => {
-    if (isOnboarding) {
-      e.preventDefault();
-      localStorage.setItem('onboardingStep', '2');
-      router.push('/hub');
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#101019] to-[#1c1c2c] p-6 text-white flex flex-col">
       <nav className="absolute top-4 left-4 z-10">
@@ -47,14 +40,17 @@ export default function ChooseJourneyPage() {
             ← Back to Hub
           </Link>
       </nav>
-      <div className="flex-grow flex flex-col items-center justify-center">
+
+      {isOnboarding && <OnboardingNextButton nextStep={2} nextPath="/hub" />}
+
+      <div className="flex-grow flex flex-col items-center justify-center pt-16">
         <h1 className="text-white text-4xl mb-12 font-semibold text-center">
             🌌 Choose Your Journey
         </h1>
 
         {isOnboarding && (
             <p className="text-center text-lg text-yellow-300 mb-8 animate-pulse">
-                Select any journey to continue.
+                Explore a journey, then click Next when you're ready.
             </p>
         )}
 
@@ -66,7 +62,7 @@ export default function ChooseJourneyPage() {
                 whileTap={{ scale: 0.95 }}
                 className="relative inline-block w-full max-w-xs p-6 bg-white/5 rounded-2xl shadow-md border border-white/10 text-white hover:shadow-lg transition-all"
             >
-                <Link href={`/journeys/${journey.id}`} onClick={(e) => handleJourneyClick(e, journey.id)} className="block w-full h-full">
+                <Link href={`/journeys/${journey.id}`} className="block w-full h-full">
                   <div className="flex flex-col h-full justify-between">
                     <h2
                       className="text-xl font-bold mb-2"
