@@ -77,7 +77,7 @@ export default function Radiate() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleDrag = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current) return;
     const { clientX, clientY } = event;
     const { left, top, width, height } = containerRef.current.getBoundingClientRect();
@@ -135,7 +135,7 @@ export default function Radiate() {
     <LayoutGroup>
       <div
         ref={containerRef}
-        onMouseMove={(e) => { if (e.buttons === 1) handleDrag(e); }}
+        onClick={handleClick}
         className="flex items-center justify-center h-screen w-full cursor-crosshair overflow-hidden relative text-[var(--color-joy-text)]"
       >
         {/* Container for the assembled quote at the top */}

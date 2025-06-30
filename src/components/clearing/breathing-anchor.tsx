@@ -3,16 +3,18 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import Typewriter from "../animation/typewriter";
 
+// Defines the phases and durations for the breathing animation.
 const PHASES = [
-	{ label: "Breathe in", duration: 4.5 },
-	{ label: "Rest", duration: 2 },
-	{ label: "Breathe out", duration: 4.5 },
-	{ label: "Rest", duration: 3 },
+	{ label: "Breathe in", duration: 4 },
+	{ label: "Rest", duration: 4 },
+	{ label: "Breathe out", duration: 4 },
+	{ label: "Rest", duration: 4 },
 ];
 
 export default function BreathingAnchor() {
 	const [phaseIdx, setPhaseIdx] = useState(0);
 
+	// This effect cycles through the breathing phases based on their duration.
 	useEffect(() => {
 		const timeout = setTimeout(() => {
 			setPhaseIdx((idx) => (idx + 1) % PHASES.length);
@@ -20,12 +22,13 @@ export default function BreathingAnchor() {
 		return () => clearTimeout(timeout);
 	}, [phaseIdx]);
 
+	// Determines the animation properties (scale and opacity) for the current phase.
 	const getAnimation = () => {
 		switch (phaseIdx) {
-			case 0: return { scale: 1.2, opacity: 1 };
-			case 1: return { scale: 1.2, opacity: 1 };
-			case 2: return { scale: 1, opacity: 0.7 };
-			case 3: return { scale: 1, opacity: 0.7 };
+			case 0: return { scale: 1.2, opacity: 1 }; // Breathe in
+			case 1: return { scale: 1.2, opacity: 1 }; // Rest (expanded)
+			case 2: return { scale: 1, opacity: 0.7 }; // Breathe out
+			case 3: return { scale: 1, opacity: 0.7 }; // Rest (shrunken)
 			default: return { scale: 1, opacity: 0.7 };
 		}
 	};

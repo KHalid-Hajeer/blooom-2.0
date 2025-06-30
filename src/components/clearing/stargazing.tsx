@@ -8,7 +8,6 @@ export default function Stargazing() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Store refs in variables to ensure stable values
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
@@ -20,11 +19,9 @@ export default function Stargazing() {
     let height = (canvas.height = container.clientHeight);
 
     const STAR_COUNT = 500;
-    // FIX: Use 'const' for arrays/objects that are mutated but not reassigned.
     const stars: { x: number; y: number; radius: number; alpha: number; isConstellation?: boolean }[] = [];
     const constellations: { points: { x: number; y: number; radius: number; alpha: number; isConstellation: boolean }[]; word: string }[] = [];
 
-    // FIX: Use 'const' for objects whose properties are changed.
     const mouse = { x: 0, y: 0 };
     const pan = { x: 0, y: 0, targetX: 0, targetY: 0 };
     let isDragging = false;
@@ -106,7 +103,6 @@ export default function Stargazing() {
     const handleMouseLeave = () => isDragging = false;
     const resizeObserver = new ResizeObserver(() => { width = canvas.width = container.clientWidth; height = canvas.height = container.clientHeight; });
     
-    // FIX: Use the stable 'container' variable to add listeners and observe.
     resizeObserver.observe(container);
     container.addEventListener("mousemove", handleMouseMove); 
     container.addEventListener("mousedown", handleMouseDown); 
@@ -119,7 +115,6 @@ export default function Stargazing() {
     return () => {
       cancelAnimationFrame(animationFrameId);
       resizeObserver.disconnect();
-      // FIX: Use the stable 'container' variable in the cleanup function.
       if (container) {
         container.removeEventListener("mousemove", handleMouseMove);
         container.removeEventListener("mousedown", handleMouseDown);
