@@ -1,5 +1,6 @@
 // src/app/garden/page.tsx
 "use client";
+
 import React, { useState, useEffect, useCallback } from "react";
 import { PanInfo } from "framer-motion";
 import GardenCanvas from "../../components/garden/GardenCanvas";
@@ -12,6 +13,7 @@ import InteractiveGradient from "../../components/animation/interactive-gradient
 import { System, SystemLog, SystemStage } from "../../lib/growthtypes";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../../lib/supabaseClient";
+import OnboardingNextButton from "@/components/ui/OnboardingNextButton";
 
 // Define a more specific type for the raw data from Supabase
 type RawSystemLog = {
@@ -67,8 +69,12 @@ export default function GardenPage() {
   const [loading, setLoading] = useState(true);
   const [submissionStatus, setSubmissionStatus] = useState({ isLoading: false, error: null as string | null });
 
+  // State to manage onboarding flow for this page
+  const [isOnboarding, setIsOnboarding] = useState(false);
+  const [showNextButton, setShowNextButton] = useState(false);
+
   const fetchSystems = useCallback(async () => {
-    // Handle unauthenticated user first
+    // Handle unauthenticated user first (during onboarding)
     if (!user) {
         const pendingSystemJSON = localStorage.getItem(PENDING_SYSTEM_KEY);
         if (pendingSystemJSON) {
@@ -106,6 +112,11 @@ export default function GardenPage() {
 
   useEffect(() => {
     fetchSystems();
+    // Check if we are in the correct onboarding step
+    const step = localStorage.getItem('onboardingStep');
+    if (step === '0') {
+      setIsOnboarding(true);
+    }
   }, [fetchSystems]);
 
   const handleOpenPlantModal = () => {
@@ -131,10 +142,10 @@ export default function GardenPage() {
   const handlePlantSystem = useCallback(async (data: { name: string; description: string; color: string; }) => {
     setSubmissionStatus({ isLoading: true, error: null });
     
-    // If user is not logged in, save to localStorage
+    // Onboarding: Save to localStorage
     if (!user) {
         const pendingSystem: System = {
-            id: Date.now(), // Use a temporary ID for the key
+            id: Date.now(),
             ...data,
             stage: 'seed',
             x: window.innerWidth / 2,
@@ -149,7 +160,7 @@ export default function GardenPage() {
         return;
     }
 
-    // Authenticated User Logic
+    // Authenticated User: Save to Supabase
     try {
       const { data: newSystemData, error } = await supabase
         .from("systems")
@@ -177,7 +188,15 @@ export default function GardenPage() {
   }, [user, handleCloseModal]);
 
   const handleTendSystem = useCallback(async (data: { note: string; mood: string }) => {
+    // During onboarding, we just show the next button. No data is saved.
+    if (isOnboarding) {
+        setShowNextButton(true);
+        handleCloseModal();
+        return;
+    }
+      
     if (!activeSystem || !user) return;
+    
     try {
       const { error: logError } = await supabase
         .from("system_logs")
@@ -207,27 +226,17 @@ export default function GardenPage() {
     } finally {
       handleCloseModal();
     }
-  }, [activeSystem, user, handleCloseModal]);
+  }, [activeSystem, user, handleCloseModal, isOnboarding]);
 
   const handleDragEnd = useCallback(async (id: number, info: PanInfo) => {
-    if (!user) return; // Prevent dragging for unauthenticated users
-
+    if (!user) return;
     const originalSystem = systems.find((s) => s.id === id);
     if (!originalSystem) return;
-
     const newX = originalSystem.x + info.offset.x;
     const newY = originalSystem.y + info.offset.y;
-
     setSystems(currentSystems => currentSystems.map((s) => s.id === id ? { ...s, x: newX, y: newY } : s));
-
     try {
-      const { error } = await supabase
-        .from("systems")
-        .update({ x_pos: newX, y_pos: newY })
-        .eq("id", id);
-      
-      if (error) throw error;
-
+      await supabase.from("systems").update({ x_pos: newX, y_pos: newY }).eq("id", id);
     } catch(error) {
       console.error("Error updating system position:", error);
       setSystems(currentSystems => currentSystems.map((s) => s.id === id ? originalSystem : s));
@@ -237,29 +246,18 @@ export default function GardenPage() {
   const handleUpdateSystem = useCallback(async (systemId: number, updates: { name: string; description: string }) => {
     if (!user) return;
     try {
-        const { data: updatedSystem, error } = await supabase
-            .from("systems")
-            .update(updates)
-            .eq("id", systemId)
-            .select("*, system_logs(*)")
-            .single();
-
+        const { data: updatedSystem, error } = await supabase.from("systems").update(updates).eq("id", systemId).select("*, system_logs(*)").single();
         if (error) throw error;
-        
         if (updatedSystem) {
           setSystems(prev => prev.map(s => s.id === systemId ? formatSystem(updatedSystem as RawSystem) : s));
         }
-    } catch(error) {
-        console.error("Error updating system:", error);
-    }
+    } catch(error) { console.error("Error updating system:", error); }
   }, [user]);
 
   const handleDeleteLog = useCallback(async (systemId: number, logId: number) => {
     if (!user) return;
     try {
-      const { error } = await supabase.from("system_logs").delete().eq("id", logId);
-      if (error) throw error;
-
+      await supabase.from("system_logs").delete().eq("id", logId);
       setSystems(prevSystems =>
         prevSystems.map(system => {
           if (system.id === systemId) {
@@ -268,9 +266,7 @@ export default function GardenPage() {
           return system;
         })
       );
-    } catch (error) {
-      console.error("Error deleting log:", error);
-    }
+    } catch (error) { console.error("Error deleting log:", error); }
   }, [user]);
 
   const handleUnplantSystem = useCallback(async (systemId: number) => {
@@ -281,27 +277,27 @@ export default function GardenPage() {
         return;
     }
     try {
-        const { error } = await supabase.from("systems").delete().eq("id", systemId);
-        if (error) throw error;
-
+        await supabase.from("systems").delete().eq("id", systemId);
         setSystems(prev => prev.filter(s => s.id !== systemId));
         handleCloseModal();
-    } catch (error) {
-        console.error("Error unplanting system:", error);
-    }
+    } catch (error) { console.error("Error unplanting system:", error); }
   }, [user, handleCloseModal]);
   
   if (loading) {
     return (
-      <div className="w-screen h-screen flex items-center justify-center text-white bg-[#e7f5ed]">
+      <div className="w-screen h-screen flex items-center justify-center text-white bg-black">
         Loading your garden...
       </div>
     );
   }
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden text-white bg-[#e7f5ed]">
-      <InteractiveGradient startColor="#ffffff" endColor="#e7f5ed" />
+    <div className="relative h-screen w-screen overflow-hidden text-white bg-black">
+      <InteractiveGradient startColor="#e7f5ed" endColor="#d3e4cd" />
+
+      {isOnboarding && showNextButton && (
+        <OnboardingNextButton nextStep={1} nextPath="/hub" />
+      )}
 
       <GardenCanvas
         systems={systems}

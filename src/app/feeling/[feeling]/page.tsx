@@ -284,8 +284,8 @@ export default function FeelingPage() {
     else action();
   };
 
-  const handleStartOnboarding = () => router.push('/onboarding/welcome');
-  const handleLogin = () => router.push('/hub');
+  const handleCreateSpace = () => router.push('/onboarding/welcome');
+  const handleLogin = () => router.push('/login');
 
   const ClearingComponent = clearingMap[feelingParam] ?? Radiate;
   const quoteText = quoteMap[feelingParam] ?? 'Your feeling is valid. Let’s explore it.';
@@ -350,7 +350,7 @@ export default function FeelingPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <motion.button
-                  onClick={handleStartOnboarding}
+                  onClick={handleCreateSpace}
                   className="px-8 py-3 bg-blue-500/80 rounded-lg hover:bg-blue-600/90 transition text-white font-semibold"
                 >
                   Create Your Space

@@ -54,7 +54,7 @@ export default function ChooseJourneyPage() {
 
     fetchProgress();
 
-    // Onboarding logic remains client-side
+    // Check if the user is in the "Journey" onboarding step.
     const step = localStorage.getItem('onboardingStep');
     if (step === '1') {
       setIsOnboarding(true);
@@ -63,6 +63,9 @@ export default function ChooseJourneyPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#101019] to-[#1c1c2c] p-6 text-white flex flex-col">
+      {/* If in onboarding, show the Next button to advance to step 2. */}
+      {isOnboarding && <OnboardingNextButton nextStep={2} nextPath="/hub" />}
+
       {!isOnboarding && (
         <nav className="absolute top-4 left-4 z-10">
             <Link href="/hub" className="text-white/70 hover:text-white transition">
@@ -71,13 +74,12 @@ export default function ChooseJourneyPage() {
         </nav>
       )}
 
-      {isOnboarding && <OnboardingNextButton nextStep={2} nextPath="/hub" />}
-
       <div className="flex-grow flex flex-col items-center justify-center pt-16">
         <h1 className="text-white text-4xl mb-12 font-semibold text-center">
             🌌 Choose Your Journey
         </h1>
 
+        {/* If in onboarding, display a specific prompt. */}
         {isOnboarding && (
             <p className="text-center text-lg text-yellow-300 mb-8 animate-pulse">
                 Explore a journey, then click Next when you&apos;re ready.

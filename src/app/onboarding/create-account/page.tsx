@@ -8,31 +8,6 @@ import { supabase } from "@/lib/supabaseClient";
 import InteractiveGradient from "@/components/animation/interactive-gradient";
 import Typewriter from "@/components/animation/typewriter";
 import Link from "next/link";
-import { User } from "@supabase/supabase-js";
-
-const PENDING_SYSTEM_KEY = 'bloom_pending_system';
-
-const savePendingSystem = async (user: User) => {
-    const pendingSystemJSON = localStorage.getItem(PENDING_SYSTEM_KEY);
-    if (pendingSystemJSON) {
-        try {
-            const systemData = JSON.parse(pendingSystemJSON);
-            const { error } = await supabase.from('systems').insert({
-                name: systemData.name,
-                description: systemData.description,
-                color: systemData.color,
-                stage: systemData.stage,
-                x_pos: systemData.x,
-                y_pos: systemData.y,
-                user_id: user.id,
-            });
-            if (error) throw error;
-            localStorage.removeItem(PENDING_SYSTEM_KEY);
-        } catch (error) {
-            console.error("Failed to save pending system:", error);
-        }
-    }
-};
 
 export default function CreateAccountPage() {
   const router = useRouter();
@@ -40,16 +15,20 @@ export default function CreateAccountPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setMessage(null);
+    setLoading(true);
 
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
     });
+
+    setLoading(false);
 
     if (signUpError) {
       setError(signUpError.message);
@@ -63,20 +42,8 @@ export default function CreateAccountPage() {
 
     setMessage("Success! Please check your email to confirm your account.");
     
-    // Auto-login the user after sign-up
-    const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-    
-    if (signInError) {
-      setError(signInError.message);
-    } else if (user) { // FIX: Ensure user object exists before proceeding
-      await savePendingSystem(user);
-      
-      localStorage.setItem('onboardingCompleted', 'true');
-      localStorage.removeItem('onboardingStep');
-      router.push("/hub");
-    } else {
-      setError("Login failed after sign up. Please try logging in manually.");
-    }
+    // --- ADDED: Redirect to /hub after sign-up is initiated ---
+    router.push("/hub");
   };
 
   return (
@@ -104,6 +71,7 @@ export default function CreateAccountPage() {
             onChange={(e) => setEmail(e.target.value)}
             className="bg-transparent border-b border-white/40 focus:border-white py-2 px-1 outline-none transition-all"
             required
+            disabled={loading}
           />
         </div>
 
@@ -116,6 +84,7 @@ export default function CreateAccountPage() {
             onChange={(e) => setPassword(e.target.value)}
             className="bg-transparent border-b border-white/40 focus:border-white py-2 px-1 outline-none transition-all"
             required
+            disabled={loading}
           />
         </div>
         
@@ -125,9 +94,10 @@ export default function CreateAccountPage() {
         <motion.button
           type="submit"
           whileTap={{ scale: 0.98 }}
-          className="mt-8 px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-lg transition"
+          className="mt-8 px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-lg transition disabled:opacity-50"
+          disabled={loading}
         >
-          Begin My Journey
+          {loading ? "Creating..." : "Begin My Journey"}
         </motion.button>
         <p className="text-center text-sm mt-4">
           Already have a space?{' '}

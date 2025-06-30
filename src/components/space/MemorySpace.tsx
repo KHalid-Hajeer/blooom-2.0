@@ -1,5 +1,3 @@
-// src/components/space/MemorySpace.tsx
-
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
@@ -13,13 +11,12 @@ interface MemorySpaceProps {
   onboardingStep: number | null;
 }
 
-const onboardingMessages: { [key: number]: string } = {
-  0: "Welcome to your space. This is the Garden, where your intentions grow. Click it to begin.",
-  1: "Beautiful. A new planet has appeared. This is Journeys, where you can follow guided paths. Let's go.",
-  2: "This is your Chronicle. A place for your reflections. Let's add your first entry.",
-  3: "You're never alone. This is your Companion, a safe space to feel heard.",
-  4: "And here are your Settings. The control room for your inner world.",
-  5: "Your space is now complete. You can now explore freely."
+const onboardingMessages: Record<string, string> = {
+  'Garden': "First, let's create a garden. This is where you can plant systems for growth and watch them bloom.",
+  'Journey': "Next, we have Journeys. These are guided paths to help you explore different aspects of yourself.",
+  'Reflections': "Here are your Reflections, a space to look back on your thoughts and feelings.",
+  'Companion': "This is your Companion, a safe space to chat and feel heard.",
+  'Settings': "Finally, here are the Settings, where you can tune your space to feel just right."
 };
 
 const getColor = (varName: string, fallback = '#ffffff') => {
@@ -59,13 +56,11 @@ export default function MemorySpace({ onboardingStep }: MemorySpaceProps) {
   const planetsRef = useRef<PlanetParticle[]>([]);
   const panRef = useRef({ x: 0, y: 0 });
   const [hoveredItem, setHoveredItem] = useState<HoveredItem | null>(null);
-  // FIX: Removed unused 'zoomedPlanet' state.
-  // const [zoomedPlanet, setZoomedPlanet] = useState<PlanetParticle | null>(null);
   
-  const isOnboarding = onboardingStep !== null && onboardingStep < 999;
+  const isOnboarding = onboardingStep !== null && onboardingStep >= 0 && onboardingStep <= 4;
   
-  const visiblePlanets = isOnboarding
-    ? planetDataList.slice(0, onboardingStep !== null ? onboardingStep + 1 : 0)
+  const visiblePlanets = isOnboarding && onboardingStep !== null
+    ? planetDataList.slice(0, onboardingStep + 1)
     : planetDataList;
 
   useEffect(() => {
@@ -74,13 +69,9 @@ export default function MemorySpace({ onboardingStep }: MemorySpaceProps) {
 
   const handlePlanetClick = useCallback((planet: PlanetParticle) => {
     if (isOnboarding && onboardingStep !== null && planet.data.name !== planetDataList[onboardingStep].name) {
-      return; // Block clicks on non-active onboarding planets
+      return; 
     }
-    // FIX: Removed unused state update. The timeout handles the navigation delay.
-    // setZoomedPlanet(planet); 
-    setTimeout(() => {
-      router.push(planet.data.route);
-    }, 600);
+    router.push(planet.data.route);
   }, [isOnboarding, onboardingStep, router]);
 
 
@@ -215,12 +206,16 @@ export default function MemorySpace({ onboardingStep }: MemorySpaceProps) {
     };
   }, [visiblePlanets, router, handlePlanetClick, hoveredItem, isOnboarding, onboardingStep]);
 
+  const currentMessage = isOnboarding && onboardingStep !== null 
+    ? onboardingMessages[planetDataList[onboardingStep].name] 
+    : null;
+
   return (
     <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
       <InteractiveGradient startColor="var(--color-heavy-start)" endColor="var(--color-heavy-end)" />
       <canvas ref={canvasRef} className="absolute top-0 left-0" />
       <AnimatePresence>
-        {isOnboarding && onboardingStep !== null && onboardingMessages[onboardingStep] &&
+        {currentMessage &&
           <motion.div
             key={onboardingStep}
             initial={{ opacity: 0, y: 20 }}
@@ -228,7 +223,7 @@ export default function MemorySpace({ onboardingStep }: MemorySpaceProps) {
             exit={{ opacity: 0, y: -20 }}
             className="absolute bottom-10 left-1/2 -translate-x-1/2 w-full max-w-2xl text-center text-white/90 text-lg p-4 z-20 font-display bg-black/30 backdrop-blur-sm rounded-xl"
           >
-            <Typewriter text={onboardingMessages[onboardingStep]} speed={60} delay={0.5} />
+            <Typewriter text={currentMessage} speed={50} delay={0.5} />
           </motion.div>
         }
       </AnimatePresence>

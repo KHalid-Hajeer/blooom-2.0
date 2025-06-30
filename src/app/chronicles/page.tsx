@@ -1,4 +1,3 @@
-// src/app/chronicles/page.tsx
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -10,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import { moodConfig, Mood } from '@/data/moods';
+import OnboardingNextButton from '@/components/ui/OnboardingNextButton';
 
 export type Reflection = {
   id: number; title: string; content: string; mood: Mood; date: string;
@@ -33,15 +33,22 @@ export default function ChroniclePage() {
     const [editingReflection, setEditingReflection] = useState<Reflection | null>(null);
     const [toastMessage, setToastMessage] = useState('');
     const [showToast, setShowToast] = useState(false);
-    const [isOnboarding] = useState(false);
-    const [, setHasWrittenOnboarding] = useState(false);
+    
+    // State to manage onboarding flow for this page
+    const [isOnboarding, setIsOnboarding] = useState(false);
+    const [showNextButton, setShowNextButton] = useState(false);
 
     const [searchTerm] = useState('');
     const [moodFilter] = useState<Mood | 'all'>('all');
     const [showArchived] = useState(false);
 
     const fetchReflections = useCallback(async () => {
-        if (!user) return;
+        // During onboarding, no need to fetch if not logged in
+        if (!user) {
+            setLoading(false);
+            return;
+        };
+
         setLoading(true);
         const { data, error } = await supabase
             .from('reflections')
@@ -59,6 +66,11 @@ export default function ChroniclePage() {
 
     useEffect(() => {
         fetchReflections();
+        // Check if we are in the correct onboarding step
+        const step = localStorage.getItem('onboardingStep');
+        if (step === '2') {
+            setIsOnboarding(true);
+        }
     }, [fetchReflections]);
 
     const showNotification = (message: string) => {
@@ -67,9 +79,26 @@ export default function ChroniclePage() {
     };
 
     const handleSaveReflection = async (reflectionData: Omit<Reflection, 'date' | 'archived' | 'starred'>) => {
-        if (!user) return;
-        const isEditing = !!editingReflection;
+        // --- THIS IS THE FIX ---
+        // Onboarding: Add locally and show the next button, without trying to save to DB.
+        if (isOnboarding) {
+            const newReflection: Reflection = {
+                ...reflectionData,
+                id: Date.now(), // Use a temporary ID
+                date: new Date().toISOString(),
+                archived: false,
+                starred: false,
+            };
+            setReflections(prev => [newReflection, ...prev]);
+            setWritingModalOpen(false);
+            setShowNextButton(true);
+            return;
+        }
+        // --- END OF FIX ---
+
+        if (!user) return; // This guard now only applies to non-onboarding users
         
+        const isEditing = !!editingReflection;
         const dataToSave = {
             title: reflectionData.title,
             content: reflectionData.content,
@@ -89,16 +118,17 @@ export default function ChroniclePage() {
         await fetchReflections();
         setEditingReflection(null);
         setWritingModalOpen(false);
-        if (isOnboarding) setHasWrittenOnboarding(true);
     };
 
     const handleEdit = (reflection: Reflection) => {
+        if (!user) return; // Prevent editing during onboarding
         setActiveReflection(null);
         setEditingReflection(reflection);
         setWritingModalOpen(true);
     };
 
     const handleArchive = async (id: number) => {
+        if (!user) return; // Prevent archiving during onboarding
         const isArchived = reflections.find(r => r.id === id)?.archived;
         await supabase.from('reflections').update({ archived: !isArchived }).eq('id', id);
         await fetchReflections();
@@ -107,6 +137,7 @@ export default function ChroniclePage() {
     };
 
     const handleStar = async (id: number) => {
+        if (!user) return; // Prevent starring during onboarding
         const isStarred = reflections.find(r => r.id === id)?.starred;
         await supabase.from('reflections').update({ starred: !isStarred }).eq('id', id);
         await fetchReflections();
@@ -134,6 +165,10 @@ export default function ChroniclePage() {
                     <h1 className="text-3xl sm:text-4xl font-display tracking-wide">📖 REFLECTION CHRONICLE</h1>
                     <p className="text-white/60 font-body text-sm sm:text-base">The Library of You</p>
                 </header>
+                
+                {isOnboarding && showNextButton && (
+                  <OnboardingNextButton nextStep={3} nextPath="/hub" />
+                )}
 
                 <main className="flex-grow flex items-center justify-center z-10 w-full overflow-hidden">
                     {loading ? (
@@ -151,7 +186,7 @@ export default function ChroniclePage() {
                                                 animate={{ opacity: 1, y: 0 }}
                                                 exit={{ opacity: 0, y: -50 }}
                                                 onClick={() => setActiveReflection(reflection)}
-                                                className={`flex-shrink-0 w-12 rounded-t-md transform transition-all duration-300 ease-in-out hover:-translate-y-2 cursor-pointer relative group ${getBookHeight(reflection.content)} ${moodConfig[reflection.mood].color}`}
+                                                className={`flex-shrink-0 w-12 rounded-t-md transform transition-all duration-300 ease-in-out hover:-translate-y-2 cursor-pointer relative group ${getBookHeight(reflection.content)} ${moodConfig[reflection.mood]?.color || 'bg-gray-400'}`}
                                             >
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-t-md"></div>
                                                 {reflection.starred && <div className="absolute -top-1 -right-1 text-yellow-300">✨</div>}
@@ -180,7 +215,6 @@ export default function ChroniclePage() {
                     </button>
                 </div>
                 
-                {/* FIX: Removed the unnecessary `moods` prop. */}
                 <WritingModal 
                   isOpen={isWritingModalOpen} 
                   onClose={() => setWritingModalOpen(false)} 

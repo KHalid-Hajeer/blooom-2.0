@@ -65,6 +65,12 @@ export default function JourneyPage() {
     }
   };
 
+  useEffect(() => {
+    if (completedStages.length >= 1) {
+      localStorage.setItem("onboardingStep", "3");
+    }
+  }, [completedStages]);
+
   if (loading) return <div className="flex h-screen items-center justify-center text-white bg-gradient-to-b from-[#1c1c2c] to-[#0f0f1a]">Loading your journey...</div>;
   if (!journeyData) return <div className="flex h-screen items-center justify-center text-white">Journey not found.</div>;
 
@@ -137,6 +143,12 @@ export default function JourneyPage() {
           {isJourneyComplete ? "Return to All Journeys" : "← Back to Journeys"}
         </motion.a>
       </Link>
+      {localStorage.getItem("onboardingStep") === "3" && (
+        <button
+          onClick={() => window.location.href = "/hub"}
+          className="fixed top-4 right-4 bg-white/20 text-white px-4 py-2 rounded-lg"
+        >Next</button>
+      )}
     </div>
   );
 }
