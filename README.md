@@ -1,8 +1,16 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bloom
+
+A personal self-growth space, crafted to feel gentle, alive, and emotionally resonant. 
+
+Built with Next.js — powered by care, intention, and quiet magic. 
+
+🌱 **Live preview (Beta)**: [blooom-2-0.vercel.app](https://blooom-2-0.vercel.app)
+
+---
 
 ## Getting Started
 
-First, run the development server:
+To run locally:
 
 ```bash
 npm run dev
@@ -14,23 +22,34 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Edit `app/page.tsx` to start shaping your own version. Changes reflect instantly.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Stack Notes
 
-To learn more about Next.js, take a look at the following resources:
+- Built with [Next.js](https://nextjs.org)
+- Deployed on [Vercel](https://vercel.com)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Philosophy
 
-## Deploy on Vercel
+> "We don’t build dashboards. We design emotional journeys."
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Bloom is in early beta — still blooming. Expect bugs, but also beauty. Every line is shaped with care.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+---
+
+## Dev Resources
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Learn Next.js](https://nextjs.org/learn)
+- [Next.js GitHub](https://github.com/vercel/next.js)
+
+---
+
+_gently in progress — and proud of it._
